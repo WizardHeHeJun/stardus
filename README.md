@@ -2,6 +2,10 @@
 
 > 基于 Astro 6 的博客模板 —— glassmorphism 玻璃风 + 柔和渐变，零后端，推送即发布。
 
+<p align="center">
+  <img src="./.github/assets/hero.png" alt="Stardust 首页：玻璃风 + 柔和渐变背景，打字机标题 / 头像 / pills / 推荐 callout / CTA 按钮 + 最近文章卡片" width="900" />
+</p>
+
 - 🌐 **在线 demo**：填上你部署的 GitHub Pages 地址（如 `https://<your-username>.github.io/<repo>/`）
 
 ---
@@ -27,6 +31,10 @@
 
 ## 🌸 主要特色
 
+<p align="center">
+  <img src="./.github/assets/post.png" alt="博文页：hero 图 + 标题 + 阅读元信息 + 右侧 TOC 侧栏 + callout + 玻璃风正文" width="900" />
+</p>
+
 ### 内容能力
 
 - 📝 **Shoka 风 Markdown 扩展** —— `:::info / :::tip / :::warning / :::danger / :::spoiler / :::fold[标题]` 六种 directive，融入玻璃风
@@ -45,7 +53,7 @@
 - 🎯 **TOC 大改造** —— 玻璃蒙版 + 阅读进度条 + 桌面侧栏 / 移动浮 header 进度环 / 窄屏 FAB
 - 🎯 **Header 自动隐藏** —— 下滑藏 / 上滑现 / 贴顶 80px 内永远显示，body class 联动 TOC 等组件
 - 🍔 **移动端 ☰ 抽屉** —— 四种关闭路径 + 二级展开 + 嵌入式最近文章 ticker（脉动小圆点 + 无缝循环）
-- 💞 **微动效集** —— 头像 hover wiggle / 卡片 wiggle / 鼠标拖尾（菱形 + 三角混搭），自动跳过触屏 + reduced-motion
+- 💞 **微动效集** —— 头像 hover wiggle / 卡片 wiggle，自动跳过触屏 + reduced-motion
 - 💧 **友链卡 per-friend accent** —— 卡顶色块 + 名字色 + hover 发光全部从 `accent` 派生（color-mix 算明暗），20° 3D tilt 跟随鼠标
 - 🔤 **霞鹜文楷** —— LXGW WenKai Screen via jsDelivr CDN，按字符 chunk 拆分
 - 📜 **自定义滚动条** —— slate-400 `#94a3b8` 灰蓝胶囊滑块（Firefox + Webkit 双适配，hover `#64748b`）
@@ -56,7 +64,15 @@
 - 🏠 **首页** —— hero 打字机 + 头像 wiggle + 橙色 callout 占位（推荐一篇博文 / 项目入口） + 最近文章 3×2 网格 + Now 区
 - 🙋 **关于** —— 6 sections 玻璃卡 + giscus 评论
 - 🎭 **戏剧版 404** —— `4 0 4` 三联浮动数字 + 飘动星光装饰
+
+<p align="center">
+  <img src="./.github/assets/404.png" alt="404 戏剧版：4 0 4 三联粉紫蓝渐变浮动数字 + 飘动星光装饰" width="700" />
+</p>
 - 👥 **友链** —— per-friend accent + OG 缓存 fallback（thumb-top 卡 / 圆头像 / 字母 tile 三级）
+
+<p align="center">
+  <img src="./.github/assets/friends.png" alt="友链页：3 张卡（Astro / Mermaid / Pagefind），每张顶部色条用各自 accent；缩略图来自 OG 缓存" width="800" />
+</p>
 - 📷 **回忆相册** —— JSON 数据驱动卡片网格，按日期倒序
 - 🎨 **画板** —— HTML5 Canvas 自由绘画（6 色板 + 自定义颜色 + 粗细滑块 + 橡皮 + 主题化 confirm modal）
 - 📌 **置顶 + 分类 + 标签** —— frontmatter `featured: true` 列表暖色金边大卡；5 个枚举分类 + 自由标签，自动聚合页
@@ -64,7 +80,10 @@
 ### 工作流工具
 
 - 🌸 **`bloom` CLI** —— 自家命令行入口（npm install 后 `npx bloom` 直接用），无参进交互菜单，带子命令直接跑：`bloom new` / `bloom cms` / `bloom refresh-og` / `bloom backup`...
-- 📝 **本地浏览器 CMS** —— `bloom cms` 启动，端口 4322，仅 `127.0.0.1` 绑定 + Host 头白名单
+- 📝 **本地浏览器 CMS** —— `bloom cms` 启动，端口 4322，仅 `127.0.0.1` 绑定 + Host 头白名单。三栏布局：文章列表 / frontmatter 表单 + markdown 编辑器 / 实时预览
+  <p align="center">
+    <img src="./.github/assets/cms.png" alt="本地浏览器 CMS 三栏：文章列表 / frontmatter 表单 + markdown 编辑器 / 实时预览" width="900" />
+  </p>
 - 🗃️ **备份 / 还原** —— `bloom backup` / `bloom restore`，tar.gz + 内嵌 manifest，标准（KB 级文本）/ 完整（含图片资产）双模式，路径安全校验防 zip-slip
 - 🎵 **音乐播放器** —— APlayer + MetingJS 网易云歌单，固定右下角
 
@@ -152,6 +171,41 @@ updatedDate: 'May 14 2026'     # 可选，更新过显示「最后更新于」
 | `![alt](src)` 独占一段且 alt 非空 | 自动转 `<figure>` + figcaption + lightbox |
 | 一行只有一个裸 URL | 自动转 OG 链接卡（数据源 `og-cache.json`） |
 
+#### 📊 Mermaid 图表
+
+客户端 lazy load——不含 ` ```mermaid ` 块的页面零 JS 增量。支持 flowchart / sequenceDiagram / classDiagram / mindmap / gantt / pie 等约 20 种图类。
+
+<p align="center">
+  <img src="./.github/assets/mermaid.png" alt="Mermaid flowchart 渲染示例" width="700" />
+  <br />
+  <img src="./.github/assets/mermaid-sequence.png" alt="Mermaid sequenceDiagram 渲染示例" width="700" />
+</p>
+
+#### 🔗 OG 链接卡
+
+**写法**：博文里**一行只有一个裸 URL**（独占一段），构建时自动转横版玻璃卡——左侧标题/描述/favicon/host，右侧缩略图。
+
+```markdown
+看下面这个站点：
+
+https://astro.build/
+
+正文继续……
+```
+
+配套命令（CI 不联网，OG meta 必须本地预抓 + commit 进 git）：
+
+```bash
+npx bloom refresh-og           # 增量：仅未缓存或抓失败的
+npx bloom refresh-og --force   # 全量重抓
+```
+
+抓不到的站点会 fallback 为文本卡，不会断渲染。缓存写在 `src/data/og-cache.json`。
+
+<p align="center">
+  <img src="./.github/assets/og-card.png" alt="OG 链接卡渲染示例：macOS 风代码块（写法） + 3 张玻璃卡（Astro / GitHub / Mermaid），左侧标题/描述/favicon、右侧缩略图" width="700" />
+</p>
+
 ---
 
 ## 📦 技术栈
@@ -183,7 +237,7 @@ stardust/
 │   │   ├── bg.jpg                   # 全屏背景图
 │   │   ├── avatar.png               # favicon 源图
 │   │   └── blog/                    # 博文 hero 图（按 slug 命名）
-│   ├── components/                  # 可复用组件（Header / Footer / TOC / 评论 / 拖尾 / 音乐...）
+│   ├── components/                  # 可复用组件（Header / Footer / TOC / 评论 / 音乐...）
 │   ├── content/blog/                # ⭐ 写新文章的地方（.md / .mdx）
 │   ├── content.config.ts            # 博文 collection schema
 │   ├── layouts/BlogPost.astro       # 文章布局 + mermaid / lightbox / 代码块 portal
@@ -318,7 +372,6 @@ git push
 | Mermaid 主题色 | [src/layouts/BlogPost.astro](src/layouts/BlogPost.astro) 末尾 `mermaid.initialize` |
 | 代码块 macOS 窗口配色 | [src/styles/global.css](src/styles/global.css) 的 `pre.astro-code` 段 |
 | lightbox 工具栏 / 缩放范围 | [src/layouts/BlogPost.astro](src/layouts/BlogPost.astro) 末尾 figure-lightbox 脚本 |
-| 鼠标拖尾参数 | [src/components/CursorTrail.astro](src/components/CursorTrail.astro)（colors / MAX / LIFE / throttle） |
 | Header 自动隐藏阈值 | [src/components/Header.astro](src/components/Header.astro) 的 `TOP_LOCK` / `THRESH` |
 
 ---

@@ -25,5 +25,13 @@
     "favicon": "https://mermaid.js.org/favicon.ico",
     "fetchedAt": "2026-05-19T09:54:00.001Z",
     "status": "ok"
+  },
+  "https://pagefind.app/": {
+    "url": "https://pagefind.app/",
+    "title": "Pagefind",
+    "description": "Pagefind is a fully static search library that aims to perform well on large sites, while using as little of your users’ bandwidth as possible, and without hosting any infrastructure.",
+    "favicon": "https://pagefind.app/favicon.ico",
+    "fetchedAt": "2026-05-21T10:27:24.069Z",
+    "status": "partial"
   }
 }

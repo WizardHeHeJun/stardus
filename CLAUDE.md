@@ -307,7 +307,7 @@ grep -c 'stylesheet.*_astro' dist/index.html  # 期望 ≥ 1
 - 所有 scroll 监听必须 `requestAnimationFrame` 节流，不用 `setTimeout` / `debounce`
 - 拖拽 / 缩放等高频事件用 `transform` 跟随，不改 `top` / `left`
 - 长动画必须有 `prefers-reduced-motion` 守卫
-- 触屏检测后跳过 hover-only 效果（拖尾、tilt、wiggle）
+- 触屏检测后跳过 hover-only 效果（tilt、wiggle）
 
 ### Astro inline script 规范
 
@@ -470,7 +470,6 @@ npm run refresh-og --force   # 全量重抓
 | `src/components/BgScrollSync.astro` | scroll → `--bg-y` 同步 |
 | `src/components/TableOfContents.astro` | 文章 TOC（桌面侧栏 / 移动浮 header / FAB） |
 | `src/components/SearchOverlay.astro` | 搜索浮窗（Pagefind JS API） |
-| `src/components/CursorTrail.astro` | 鼠标拖尾 |
 | `src/components/MusicPlayer.astro` | APlayer + MetingJS |
 | `src/components/Sidebar.astro` | 博客列表左侧栏 |
 | `src/components/HeroImage.astro` | LQIP + Astro Image 包装 |
@@ -525,7 +524,6 @@ npm run refresh-og --force   # 全量重抓
 | 代码块 macOS 窗口配色 | `global.css` 的 `pre.astro-code` 段 |
 | Shoka callout 配色 | `global.css` 的 `.prose .callout-*` |
 | lightbox 工具栏 / 缩放范围 | `BlogPost.astro` 末尾 figure-lightbox 脚本 |
-| 鼠标拖尾参数 | `CursorTrail.astro`（colors / MAX / LIFE / throttle） |
 | Header 自动隐藏阈值 | `Header.astro` 的 `TOP_LOCK` / `THRESH` |
 | 首页打字机短句 | `src/pages/index.astro` 的 `typeLines` |
 | 首页 Now 区 | `src/pages/index.astro` 的 `.now-grid` 块 |

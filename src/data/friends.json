@@ -1,1 +1,20 @@
-[]
+[
+	{
+		"name": "Astro",
+		"url": "https://astro.build/",
+		"description": "构建你想要的 web —— 静态站点生成器，本模板的基底",
+		"accent": "#bc52ee"
+	},
+	{
+		"name": "Mermaid",
+		"url": "https://mermaid.js.org/",
+		"description": "用文本写图表 —— flowchart / sequence / gantt / mindmap 全支持",
+		"accent": "#ff3670"
+	},
+	{
+		"name": "Pagefind",
+		"url": "https://pagefind.app/",
+		"description": "零配置的静态全文搜索 —— 本站搜索引擎",
+		"accent": "#3aaaff"
+	}
+]
