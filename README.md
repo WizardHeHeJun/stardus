@@ -98,12 +98,11 @@
 
 ### 工作流工具
 
-- 🌸 **`bloom` CLI** —— 自家命令行入口（npm install 后 `npx bloom` 直接用），无参进交互菜单，带子命令直接跑：`bloom new` / `bloom cms` / `bloom refresh-og` / `bloom backup`...
-- 📝 **本地浏览器 CMS** —— `bloom cms` 启动，端口 4322，仅 `127.0.0.1` 绑定 + Host 头白名单。三栏布局：文章列表 / frontmatter 表单 + markdown 编辑器 / 实时预览
+- 🌸 **`bloom` CLI** —— 自家交互式命令行，覆盖：新建博文 / 本地 CMS / OG 刷新 / 备份还原 / 列表清理。详见下方 **bloom CLI 工具** 段
+- 📝 **本地浏览器 CMS** —— 三栏布局（文章列表 / frontmatter 表单 + markdown 编辑器 / 实时预览），端口 4322，仅 `127.0.0.1` 绑定 + Host 头白名单
   <p align="center">
     <img src="./.github/assets/cms.png" alt="本地浏览器 CMS 三栏：文章列表 / frontmatter 表单 + markdown 编辑器 / 实时预览" width="900" />
   </p>
-- 🗃️ **备份 / 还原** —— `bloom backup` / `bloom restore`，tar.gz + 内嵌 manifest，标准（KB 级文本）/ 完整（含图片资产）双模式，路径安全校验防 zip-slip
 - 🎵 **音乐播放器** —— APlayer + MetingJS 网易云歌单，固定右下角
 
 ---
@@ -130,8 +129,6 @@ gh run list --workflow "Deploy to GitHub Pages" --limit 1      # 查最新状态
 
 ## ⚡ 快速开始
 
-### 本地开发
-
 ```powershell
 git clone <your-repo-url>
 cd <your-repo>
@@ -139,34 +136,80 @@ npm install
 npm run dev      # http://localhost:4321/
 ```
 
-### 写新博文（三入口）
-
-```powershell
-# A. 交互菜单（推荐 —— 可顺手备份 / 还原 / 刷 OG）
-npx bloom
-
-# B. 直接新建（菜单的「新建」也走它）
-npx bloom new    # 交互输入：标题 / slug / 分类 / 标签 / 置顶 / 描述
-                 # 生成 src/content/blog/<slug>.md（含注释掉的 heroImage 行）
-
-# C. 浏览器写作
-npx bloom cms    # 端口 4322，首次自动 npm install cms/
-```
-
-加 hero 图 → 拖到 `src/assets/blog/<slug>.jpg`，取消 heroImage 注释。
-prebuild 自动重生 `lqip.json`，无需手动跑。
-
-发布：
+写完发布（约 40-50s 自动上线）：
 
 ```powershell
 git add .
 git commit -m "post: 文章标题"
-git push         # 约 40-50s 自动上线
+git push
 ```
 
-### Frontmatter 速查
+---
 
-最小字段（schema 见 [src/content.config.ts](src/content.config.ts)）：
+## 🌸 bloom CLI 工具
+
+`bloom` 是本项目自带交互式 CLI，覆盖博客日常所有操作 —— `npm install` 后 `npx bloom` 直接可用（bin 链接已自动建立在 `./node_modules/.bin/bloom`）。
+
+```bash
+npx bloom                       # ⭐ 交互菜单：新建 / CMS / 刷 OG / 备份 / 还原 / 列表 / 清理
+npx bloom new                   # 新建博文
+npx bloom cms                   # 本地浏览器 CMS（端口 4322，仅 127.0.0.1）
+npx bloom refresh-og            # 增量抓 friends.json + 博文裸 URL 的 OG meta
+npx bloom refresh-og --force    # 全量重抓
+npx bloom backup                # 备份（交互选标准 / 完整）
+npx bloom restore               # 从备份还原（默认先备份当前状态）
+npx bloom list                  # 列出已有备份
+npx bloom clean                 # 清理旧备份
+npx bloom --help                # 子命令清单
+```
+
+### 新建博文
+
+`npx bloom new` 交互输入：标题 / slug / 分类 / 标签 / 置顶 / 描述，生成 `src/content/blog/<slug>.md`（含注释掉的 heroImage 行）。
+
+加 hero 图：把横版 jpg/png 拖到 `src/assets/blog/<slug>.jpg`，取消 frontmatter 里 `heroImage` 注释。prebuild 自动重生 `src/data/lqip.json`，**不用手动跑**。
+
+### 本地 CMS
+
+`npx bloom cms` 启动浏览器 CMS（端口 **4322**，仅 `127.0.0.1` 绑定 + Host 头白名单——外网穿透到 4322 也直接 403）。三栏布局：文章列表 / frontmatter 表单 + markdown 编辑器 / 实时预览。
+
+首次启动自动 `npm install cms/`。
+
+### OG 刷新
+
+裸 URL 链接卡的元数据从 `src/data/og-cache.json` 读 —— 构建时**不联网**。所以新写裸 URL 后必须本地预抓 + commit：
+
+```bash
+npx bloom refresh-og           # 增量：仅未缓存或抓失败的
+npx bloom refresh-og --force   # 全量重抓
+```
+
+`friends.json` 改完也必须跑（友链缩略图同源）。抓不到的站点会 fallback 为文本卡，不会断渲染。
+
+### 备份 / 还原
+
+`npx bloom backup` 直接走入（或 `npx bloom` 菜单选「备份」）。两种粒度：
+
+| 模式 | 内容 | 体积 |
+| :--- | :--- | :--- |
+| **标准** | `src/content/blog` + `src/data` + 几个 config 文件 + CLAUDE.md + package.json | KB 级 |
+| **完整** | 标准 + `src/assets/blog` + `bg.jpg` + `avatar.png` + `public/memories` | MB 级 |
+
+实现约束（见 [scripts/lib/backup.mjs](scripts/lib/backup.mjs)）：
+
+- tar.gz 包内嵌 `.backup-manifest-<ts>.json`，还原前可 dry-read
+- **还原前必做路径安全校验**：拒绝 `..` / 绝对路径 / null byte（防 zip-slip）
+- 默认推荐「先备份当前状态再还原」分支
+
+`npx bloom restore` 从已有备份还原（默认先备份当前状态当 safety net），`npx bloom list` 列已有备份，`npx bloom clean` 清旧。
+
+---
+
+## ✍️ 写博文速查
+
+### Frontmatter
+
+最小字段（完整 schema 见 [src/content.config.ts](src/content.config.ts)）：
 
 ```yaml
 title: '...'
@@ -179,7 +222,7 @@ heroImage: '../../assets/blog/<slug>.jpg'  # 可选
 updatedDate: 'May 14 2026'     # 可选，更新过显示「最后更新于」
 ```
 
-### Markdown 扩展速查
+### Markdown 扩展
 
 | 语法 | 用途 |
 | :--- | :--- |
@@ -192,7 +235,7 @@ updatedDate: 'May 14 2026'     # 可选，更新过显示「最后更新于」
 
 #### 📊 Mermaid 图表
 
-客户端 lazy load——不含 ` ```mermaid ` 块的页面零 JS 增量。支持 flowchart / sequenceDiagram / classDiagram / mindmap / gantt / pie 等约 20 种图类。
+客户端 lazy load —— 不含 ` ```mermaid ` 块的页面零 JS 增量。支持 flowchart / sequenceDiagram / classDiagram / mindmap / gantt / pie 等约 20 种图类。
 
 <p align="center">
   <img src="./.github/assets/mermaid.png" alt="Mermaid flowchart 渲染示例" width="700" />
@@ -202,7 +245,7 @@ updatedDate: 'May 14 2026'     # 可选，更新过显示「最后更新于」
 
 #### 🔗 OG 链接卡
 
-**写法**：博文里**一行只有一个裸 URL**（独占一段），构建时自动转横版玻璃卡——左侧标题/描述/favicon/host，右侧缩略图。
+**写法**：博文里**一行只有一个裸 URL**（独占一段），构建时自动转横版玻璃卡 —— 左侧标题/描述/favicon/host，右侧缩略图。
 
 ```markdown
 看下面这个站点：
@@ -212,14 +255,7 @@ https://astro.build/
 正文继续……
 ```
 
-配套命令（CI 不联网，OG meta 必须本地预抓 + commit 进 git）：
-
-```bash
-npx bloom refresh-og           # 增量：仅未缓存或抓失败的
-npx bloom refresh-og --force   # 全量重抓
-```
-
-抓不到的站点会 fallback 为文本卡，不会断渲染。缓存写在 `src/data/og-cache.json`。
+抓 OG meta 走 `npx bloom refresh-og`（见上方 **bloom CLI - OG 刷新** 段）。
 
 <p align="center">
   <img src="./.github/assets/og-card.png" alt="OG 链接卡渲染示例：macOS 风代码块（写法） + 3 张玻璃卡（Astro / GitHub / Mermaid），左侧标题/描述/favicon、右侧缩略图" width="700" />
@@ -303,46 +339,12 @@ npm run build       # 生产构建到 dist/（prebuild 自动重生 LQIP）
 npm run preview     # 本地预览构建产物
 ```
 
-### 本项目自定义 CLI（`bloom`）
-
-`npm install` 之后 `npx bloom` 直接可用——bin 链接已自动建立在 `./node_modules/.bin/bloom`。
-
-```bash
-npx bloom                       # ⭐ 交互菜单：新建 / CMS / 刷 OG / 备份 / 还原 / 列表 / 清理
-npx bloom new                   # 直接新建博文
-npx bloom cms                   # 本地浏览器 CMS（端口 4322，仅 127.0.0.1）
-npx bloom refresh-og            # 抓 friends.json + 博文裸 URL 的 OG meta
-npx bloom refresh-og --force    # 全量重抓
-npx bloom backup                # 备份（交互选标准 / 完整）
-npx bloom restore               # 从备份还原（默认先备份当前状态）
-npx bloom list                  # 列出已有备份
-npx bloom clean                 # 清理旧备份
-npx bloom --help                # 子命令清单
-```
-
 ### 资源工具（直接跑脚本，无 bloom 子命令包装）
 
 ```bash
 node scripts/gen-favicon.mjs    # 换头像后重新生成 favicon
 node scripts/crop-hero.mjs      # 竖版人像图预裁为脸居中横版
 ```
-
----
-
-## 🗃️ 备份 / 还原
-
-`npx bloom backup` 直接走入（或 `npx bloom` 菜单选「备份」）。两种粒度：
-
-| 模式 | 内容 | 体积 |
-| :--- | :--- | :--- |
-| **标准** | `src/content/blog` + `src/data` + 几个 config 文件 + CLAUDE.md + package.json | KB 级 |
-| **完整** | 标准 + `src/assets/blog` + `bg.jpg` + `avatar.png` + `public/memories` | MB 级 |
-
-实现约束（见 [scripts/lib/backup.mjs](scripts/lib/backup.mjs)）：
-
-- tar.gz 包内嵌 `.backup-manifest-<ts>.json`，还原前可 dry-read
-- **还原前必做路径安全校验**：拒绝 `..` / 绝对路径 / null byte（防 zip-slip）
-- 默认推荐「先备份当前状态再还原」分支
 
 ---
 
