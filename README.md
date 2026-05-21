@@ -1,4 +1,4 @@
-# Astro 博客模板
+# 星屑 Stardust
 
 > 基于 Astro 6 的博客模板 —— glassmorphism 玻璃风 + 柔和渐变，零后端，推送即发布。
 
