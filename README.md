@@ -323,21 +323,6 @@ git push
 
 ---
 
-## ⚠️ 别再踩这些坑
-
-反复栽过的几个，留给未来的自己：
-
-1. **改完必须 `npm run build` 验证再 push** —— CI 失败的代价远高于本地多跑 30 秒
-2. **视觉改动 push 后强刷** —— `Ctrl+Shift+R`，默认刷新对图片 / 字体不奏效
-3. **响应式只用四档断点**：`640 / 960 / 1280 / 1400`（+ 1800 大屏，720 给汉堡触发） —— 不要发明 720 / 1024 之类
-4. **`friends.json` 改完一定跑 `npx bloom refresh-og`** —— OG 数据要 commit 进 git，CI 不上网
-5. **装新 npm 包前看 install hook** —— `grep -E 'preinstall|postinstall' node_modules/<pkg>/package.json`；obfuscated 代码 + crypto + fetch + 强制非主流 runtime = 直接否决
-6. **二次元图必须实际看一眼再用** —— LLM 基于 tag 推断常常出错（侧脸 / 背影 / 水印混进来）
-7. **循环/重复装饰项不能伪装成数据** —— ticker / carousel 为无缝过渡常把首项复制到末尾；单条数据时**不要复制装饰项**（不然会自己跟自己循环），同时容器本身要保留（不然让位规则会留可见空白），动画用 `data-count` 等单独条件关掉
-8. **`astro build` 连跑 2-3 次** —— 单次 build 完 `dist/_astro/` 可能完全没 CSS（HTML 只剩外部 CDN 引用 → 浏览器看到完全裸样式），build 本身不报错；通常第二次稳，**清缓存后第一次跑可能要 3 次**。验证：`ls dist/_astro/*.css | wc -l` 期望 7
-
----
-
 ## 📚 灵感来源
 
 - **[Hexo Shoka](https://shoka.lostyu.me/)** —— `:::callout` / `:::spoiler` / `:::fold` 等 directive 风格

@@ -1,5 +1,5 @@
 ---
-title: '博文写作小魔法：所有写法、扩展、frontmatter 一次性查表'
+title: '博文写作：所有写法、扩展、frontmatter 一次性查表'
 description: '博文 markdown 写法、自家扩展、frontmatter 速查的 cheatsheet'
 pubDate: 'May 19 2026'
 updatedDate: 'May 21 2026'

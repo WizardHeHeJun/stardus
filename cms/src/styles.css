@@ -471,7 +471,7 @@ body {
 	border-radius: 6px;
 }
 
-/* shoka directives 预览（与 stardust plugins/remark-shoka-directives.mjs 视觉对齐） */
+/* shoka directives 预览（与主站 plugins/remark-shoka-directives.mjs 视觉对齐） */
 .markdown-preview .callout {
 	margin: 0.8em 0;
 	padding: 0.7em 1em;

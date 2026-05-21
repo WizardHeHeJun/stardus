@@ -36,9 +36,9 @@ export function App() {
 		<div class="cms-shell">
 			<aside class="cms-sidebar">
 				<header class="sidebar-head">
-					<h1>❀ 星屑 Stardust</h1>
+					<h1>星屑 Stardust</h1>
 					<div class="sub">
-						{posts.length} 篇 · Phase 2B
+						{posts.length} 篇
 						{isDirty && <span class="dirty-inline" title="有未保存的修改"> ●</span>}
 					</div>
 				</header>
