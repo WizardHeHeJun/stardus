@@ -62,20 +62,39 @@
 ### 独立页面
 
 - 🏠 **首页** —— hero 打字机 + 头像 wiggle + 橙色 callout 占位（推荐一篇博文 / 项目入口） + 最近文章 3×2 网格 + Now 区
+  <p align="center">
+    <img src="./.github/assets/home.png" alt="首页整页：hero 区 + 最近文章 3×2 网格 + Now 区" width="800" />
+  </p>
+
 - 🙋 **关于** —— 6 sections 玻璃卡 + giscus 评论
+  <p align="center">
+    <img src="./.github/assets/about.png" alt="关于页：6 张玻璃卡纵向堆叠（Hero / 自我介绍 / 工具箱 / 日常碎碎念 / 关于这个站 / 评论）" width="700" />
+  </p>
+
 - 🎭 **戏剧版 404** —— `4 0 4` 三联浮动数字 + 飘动星光装饰
+  <p align="center">
+    <img src="./.github/assets/404.png" alt="404 戏剧版：4 0 4 三联粉紫蓝渐变浮动数字 + 飘动星光装饰" width="700" />
+  </p>
 
-<p align="center">
-  <img src="./.github/assets/404.png" alt="404 戏剧版：4 0 4 三联粉紫蓝渐变浮动数字 + 飘动星光装饰" width="700" />
-</p>
 - 👥 **友链** —— per-friend accent + OG 缓存 fallback（thumb-top 卡 / 圆头像 / 字母 tile 三级）
+  <p align="center">
+    <img src="./.github/assets/friends.png" alt="友链页：3 张卡（Astro / Mermaid / Pagefind），每张顶部色条用各自 accent；缩略图来自 OG 缓存" width="800" />
+  </p>
 
-<p align="center">
-  <img src="./.github/assets/friends.png" alt="友链页：3 张卡（Astro / Mermaid / Pagefind），每张顶部色条用各自 accent；缩略图来自 OG 缓存" width="800" />
-</p>
 - 📷 **回忆相册** —— JSON 数据驱动卡片网格，按日期倒序
+  <p align="center">
+    <img src="./.github/assets/memories.png" alt="回忆相册：JSON 数据驱动卡片网格 + 日期倒序" width="700" />
+  </p>
+
 - 🎨 **画板** —— HTML5 Canvas 自由绘画（6 色板 + 自定义颜色 + 粗细滑块 + 橡皮 + 主题化 confirm modal）
+  <p align="center">
+    <img src="./.github/assets/whiteboard.png" alt="画板页：顶部工具栏（6 色板 + 自定义颜色 + 粗细滑块 + 橡皮 + 清空），下方画布" width="800" />
+  </p>
+
 - 📌 **置顶 + 分类 + 标签** —— frontmatter `featured: true` 列表暖色金边大卡；5 个枚举分类 + 自由标签，自动聚合页
+  <p align="center">
+    <img src="./.github/assets/blog-list.png" alt="博客列表：左侧 sidebar（头像 / 统计 / 最近文章）+ 右侧置顶大卡（暖色金边 + 21:9 hero）" width="800" />
+  </p>
 
 ### 工作流工具
 
