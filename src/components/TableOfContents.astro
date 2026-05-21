@@ -1,0 +1,921 @@
+---
+// 文章目录（TOC）
+// - 桌面 ≥1280: 左侧 fixed 栏（不影响文章宽度，玻璃风）
+// - 窄屏: 在 .prose 顶部显示一个胶囊触发器，点击展开下拉
+// - 客户端从 .prose 的 h2/h3 标题构建；用 IntersectionObserver 做 scroll-spy
+// 文章无 h2/h3 时整个组件不显示。
+// - 接受 prevPost / nextPost props 渲染上下篇切换
+// - 底部进度条客户端 JS 监听 scroll 显示阅读进度
+
+type PostRef = { id: string; title: string } | null;
+interface Props {
+	prevPost?: PostRef;
+	nextPost?: PostRef;
+}
+const { prevPost = null, nextPost = null } = Astro.props;
+---
+
+<aside class="toc-desktop" id="toc-desktop" aria-label="文章目录" hidden>
+	<button class="toc-head-pill" type="button" aria-label="文章目录">
+		<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+			><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg
+		>
+		<span>文章目录</span>
+	</button>
+	<nav class="toc-list-wrap"><ul class="toc-list" id="toc-list-desktop"></ul></nav>
+	{(prevPost || nextPost) && (
+		<div class="toc-prev-next">
+			{prevPost ? (
+				<a class="toc-pn toc-pn-prev" href={`/blog/${prevPost.id}/`} title={prevPost.title}>
+					<span class="pn-arrow">‹</span>
+					<span class="pn-label">
+						<span class="pn-hint">上一篇</span>
+						<span class="pn-title">{prevPost.title}</span>
+					</span>
+				</a>
+			) : (
+				<span class="toc-pn toc-pn-disabled" aria-hidden="true"></span>
+			)}
+			{nextPost ? (
+				<a class="toc-pn toc-pn-next" href={`/blog/${nextPost.id}/`} title={nextPost.title}>
+					<span class="pn-label">
+						<span class="pn-hint">下一篇</span>
+						<span class="pn-title">{nextPost.title}</span>
+					</span>
+					<span class="pn-arrow">›</span>
+				</a>
+			) : (
+				<span class="toc-pn toc-pn-disabled" aria-hidden="true"></span>
+			)}
+		</div>
+	)}
+	<div class="toc-footer">
+		<button class="toc-action" type="button" data-scroll-top aria-label="返回顶部">
+			<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+				><polyline points="18 15 12 9 6 15"></polyline></svg
+			>
+			<span>回到顶部</span>
+		</button>
+		<button class="toc-action" type="button" data-scroll-bottom aria-label="滚到底部">
+			<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+				><polyline points="6 9 12 15 18 9"></polyline></svg
+			>
+			<span>滚到底部</span>
+		</button>
+	</div>
+	<div class="toc-progress-bar" aria-hidden="true">
+		<div class="toc-progress-bar-fill" id="toc-progress-bar-fill"></div>
+	</div>
+</aside>
+
+<!-- 右下角浮动按钮组：回到顶部 / 滚到底部 / 折叠切换。窄屏可见（桌面已在 TOC 侧栏内部有相同按钮） -->
+<div class="toc-fab" id="toc-fab" hidden>
+	<button class="toc-fab-btn toc-fab-scroll" type="button" data-fab-scroll-top aria-label="回到顶部">
+		<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+			><polyline points="18 15 12 9 6 15"></polyline></svg
+		>
+	</button>
+	<button class="toc-fab-btn toc-fab-scroll" type="button" data-fab-scroll-bottom aria-label="滚到底部">
+		<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+			><polyline points="6 9 12 15 18 9"></polyline></svg
+		>
+	</button>
+	<button class="toc-fab-btn toc-fab-toggle" type="button" data-fab-toggle aria-label="折叠 / 展开" aria-expanded="true">
+		<svg class="toc-fab-icon-close" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+			><line x1="6" y1="6" x2="18" y2="18"></line><line x1="6" y1="18" x2="18" y2="6"></line></svg
+		>
+		<svg class="toc-fab-icon-open" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+			><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg
+		>
+	</button>
+</div>
+
+<div class="toc-mobile" id="toc-mobile" hidden>
+	<button class="toc-mobile-trigger" id="toc-mobile-trigger" aria-expanded="false" aria-controls="toc-mobile-panel">
+		<!-- 阅读进度环：随滚动实时填充 -->
+		<svg class="toc-progress-ring" viewBox="0 0 36 36" width="34" height="34" aria-hidden="true">
+			<circle class="toc-progress-bg" cx="18" cy="18" r="14" fill="none" stroke="rgba(0, 0, 0, 0.14)" stroke-width="3.5"></circle>
+			<circle class="toc-progress-arc" id="toc-progress-arc" cx="18" cy="18" r="14" fill="none" stroke="#64748b" stroke-width="3.5"
+				stroke-dasharray="87.96" stroke-dashoffset="87.96" stroke-linecap="round"
+				transform="rotate(-90 18 18)"></circle>
+		</svg>
+		<span class="toc-mobile-current" id="toc-mobile-current">目录</span>
+		<svg class="toc-chevron" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+			><polyline points="6 9 12 15 18 9"></polyline></svg
+		>
+	</button>
+	<div class="toc-mobile-panel" id="toc-mobile-panel"><ul class="toc-list" id="toc-list-mobile"></ul></div>
+</div>
+
+<script is:inline>
+	const initTOC = () => {
+		const prose = document.querySelector('.prose');
+		if (!prose) return;
+		const headings = Array.from(prose.querySelectorAll('h2, h3'));
+		if (headings.length === 0) return;
+
+		const slugify = (text) =>
+			text
+				.trim()
+				.toLowerCase()
+				.replace(/[^\w一-龥\s-]/g, '')
+				.replace(/\s+/g, '-')
+				.replace(/-+/g, '-')
+				.replace(/^-|-$/g, '');
+
+		// 给所有标题加 ID + 收集编号
+		const used = new Set();
+		const items = [];
+		let n2 = 0, n3 = 0;
+		headings.forEach((h) => {
+			const level = parseInt(h.tagName.slice(1));
+			if (level === 2) { n2++; n3 = 0; }
+			else { n3++; }
+			if (!h.id) {
+				let base = slugify(h.textContent || '') || 'section';
+				let id = base, i = 1;
+				while (used.has(id) || document.getElementById(id)) {
+					id = `${base}-${i++}`;
+				}
+				h.id = id;
+			}
+			used.add(h.id);
+			const num = level === 2 ? `${n2}.` : `${n2}.${n3}`;
+			items.push({ id: h.id, text: h.textContent || '', level, num, el: h });
+		});
+
+		// 渲染列表 HTML
+		const renderList = () =>
+			items
+				.map(
+					(it) => `
+				<li class="toc-item toc-l${it.level}" data-id="${it.id}">
+					<a href="#${it.id}">
+						<span class="toc-num">${it.num}</span>
+						<span class="toc-text">${it.text.replace(/</g, '&lt;')}</span>
+					</a>
+				</li>`,
+				)
+				.join('');
+
+		const html = renderList();
+		const desktopList = document.getElementById('toc-list-desktop');
+		const mobileList = document.getElementById('toc-list-mobile');
+		const desktop = document.getElementById('toc-desktop');
+		const mobile = document.getElementById('toc-mobile');
+		const trigger = document.getElementById('toc-mobile-trigger');
+		const panel = document.getElementById('toc-mobile-panel');
+		const currentLabel = document.getElementById('toc-mobile-current');
+		if (desktopList) desktopList.innerHTML = html;
+		if (mobileList) mobileList.innerHTML = html;
+		desktop.hidden = false;
+		mobile.hidden = false;
+
+		// 平滑滚动 + 关闭移动端面板
+		const closeMobile = () => {
+			mobile.classList.remove('is-open');
+			trigger.setAttribute('aria-expanded', 'false');
+		};
+		document.querySelectorAll('.toc-list a').forEach((a) => {
+			a.addEventListener('click', (e) => {
+				const id = a.getAttribute('href')?.slice(1);
+				if (!id) return;
+				const target = document.getElementById(id);
+				if (!target) return;
+				e.preventDefault();
+				const top = target.getBoundingClientRect().top + window.scrollY - 72;
+				window.scrollTo({ top, behavior: 'smooth' });
+				history.replaceState(null, '', `#${id}`);
+				closeMobile();
+			});
+		});
+
+		// 移动端触发器
+		trigger.addEventListener('click', () => {
+			const open = mobile.classList.toggle('is-open');
+			trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+		});
+		document.addEventListener('click', (e) => {
+			if (!mobile.classList.contains('is-open')) return;
+			if (!mobile.contains(e.target)) closeMobile();
+		});
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && mobile.classList.contains('is-open')) closeMobile();
+		});
+
+		// Scroll-spy：哪一节标题离视口顶部最近就高亮
+		const idToItems = new Map();
+		document.querySelectorAll('.toc-item').forEach((li) => {
+			const id = li.getAttribute('data-id');
+			if (!id) return;
+			if (!idToItems.has(id)) idToItems.set(id, []);
+			idToItems.get(id).push(li);
+		});
+
+		const setActive = (id) => {
+			document.querySelectorAll('.toc-item.is-active').forEach((li) => li.classList.remove('is-active'));
+			const lis = idToItems.get(id) || [];
+			lis.forEach((li) => li.classList.add('is-active'));
+			// 更新移动端胶囊上的当前标题
+			const item = items.find((it) => it.id === id);
+			if (item && currentLabel) currentLabel.textContent = `${item.num} ${item.text}`;
+			// 让桌面端的高亮项滚入视野
+			const desktopLi = lis.find((li) => li.closest('#toc-desktop'));
+			if (desktopLi) desktopLi.scrollIntoView({ block: 'nearest' });
+		};
+
+		// 找当前最贴近顶部（但已进入视口）的 heading
+		let raf = 0;
+		const recompute = () => {
+			raf = 0;
+			let activeId = items[0].id;
+			const offset = 96; // header 高度 + 缓冲
+			for (const it of items) {
+				const rect = it.el.getBoundingClientRect();
+				if (rect.top - offset <= 0) activeId = it.id;
+				else break;
+			}
+			setActive(activeId);
+			// 第一个标题已经滚到 viewport 顶部（offset 内）→ 揭示 TOC 胶囊
+			// 没揭示前 .toc-mobile 用 CSS 设为 opacity:0 + pointer-events:none，
+			// 给 icon-only nav 留出独立的视觉空间（避免胶囊默认就占着不动）
+			// 同步 body.toc-revealed 类：≤640 时 header 中部的 h2 站名会让位淡出
+			// （TOC 胶囊 fixed 浮层会与之视觉冲突）
+			if (mobile && items[0]) {
+				const firstRect = items[0].el.getBoundingClientRect();
+				const revealed = firstRect.top - offset <= 0;
+				mobile.classList.toggle('is-revealed', revealed);
+				document.body.classList.toggle('toc-revealed', revealed);
+			}
+		};
+		window.addEventListener(
+			'scroll',
+			() => {
+				if (!raf) raf = requestAnimationFrame(recompute);
+			},
+			{ passive: true },
+		);
+		recompute();
+
+		/* —— 阅读进度环：跟随滚动实时填充 ——
+		   r=14 时周长 = 2π·14 ≈ 87.96。dashoffset 从 87.96 (空) → 0 (满) */
+		const progressArc = document.getElementById('toc-progress-arc');
+		const PROGRESS_CIRCUMFERENCE = 87.96;
+		const updateProgress = () => {
+			if (!progressArc) return;
+			const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+			const progress = docHeight > 0 ? Math.min(1, Math.max(0, window.scrollY / docHeight)) : 0;
+			progressArc.style.strokeDashoffset = String(PROGRESS_CIRCUMFERENCE * (1 - progress));
+		};
+		let rafProgress = 0;
+		const onScrollProgress = () => {
+			if (!rafProgress) rafProgress = requestAnimationFrame(() => { updateProgress(); rafProgress = 0; });
+		};
+		window.addEventListener('scroll', onScrollProgress, { passive: true });
+		window.addEventListener('resize', onScrollProgress, { passive: true });
+		updateProgress();
+
+		/* —— TOC 位置：未滚出 hero 时贴在 hero 下方，滚出后吸顶
+		   用 transform: translateY 走 GPU 合成层，避免每帧 layout 重排 —— */
+		const hero = document.querySelector('.hero-image');
+		let curSig = '';
+		const updateTocTop = () => {
+			if (!hero || !desktop) return;
+			// header 隐藏时让 TOC 真的贴 viewport 顶（8px 余量），现身时给 header 让位（80px）
+			const stickyTop = document.body.classList.contains('header-hidden') ? 8 : 80;
+			const heroRect = hero.getBoundingClientRect();
+			const top = Math.max(stickyTop, Math.round(heroRect.bottom + 20));
+			// 「完全展开」= hero 已滚出（top 已贴到 stickyTop）。否则 TOC 还跟在 hero 下方
+			// 此状态下底部按钮组隐藏 —— 视觉上 TOC 像「从 hero 下方向下生长，直到完全展开
+			// 才解锁底部按钮」，而不是一开始就上下两端各占一段
+			desktop.classList.toggle('is-collapsed', top > stickyTop);
+			const vh = window.innerHeight;
+			const sig = top + '|' + vh; // 检测 top 或 viewport 变化
+			if (sig === curSig) return; // 避免无意义重绘
+			curSig = sig;
+			desktop.style.transform = `translateY(${top}px)`;
+			// 用 height 强制 TOC 卡撑满 viewport（短目录 + 长目录都贴底）：
+			// list-wrap flex: 1 1 0 占满中部，内部按内容滚动；上下两端的渐变 mask 让
+			// 「短目录下方的空白」/「长目录边界」都柔和淡出（不是硬切的「mid-air 空白」）
+			// 底部余量根据 header 状态动态：header 隐藏时 8px（贴近 viewport 底），
+			// header 现身时 20px（给玻璃 shadow 留视觉呼吸空间）
+			const bottomGap = document.body.classList.contains('header-hidden') ? 8 : 20;
+			desktop.style.height = vh - top - bottomGap + 'px';
+			desktop.style.maxHeight = '';
+		};
+		let rafTop = 0;
+		const onScrollTop = () => {
+			if (!rafTop) rafTop = requestAnimationFrame(() => { updateTocTop(); rafTop = 0; });
+		};
+		window.addEventListener('scroll', onScrollTop, { passive: true });
+		window.addEventListener('resize', onScrollTop, { passive: true });
+		updateTocTop();
+
+		/* —— 跳转按钮：桌面 sidebar 内 + 移动 FAB 浮动 —— */
+		const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+		const scrollBottom = () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+		document.querySelectorAll('[data-scroll-top], [data-fab-scroll-top]').forEach((b) =>
+			b.addEventListener('click', scrollTop),
+		);
+		document.querySelectorAll('[data-scroll-bottom], [data-fab-scroll-bottom]').forEach((b) =>
+			b.addEventListener('click', scrollBottom),
+		);
+		const fab = document.getElementById('toc-fab');
+		if (fab) fab.hidden = false;
+		const fabToggle = document.querySelector('[data-fab-toggle]');
+		fabToggle?.addEventListener('click', () => {
+			const collapsed = fab?.classList.toggle('is-collapsed');
+			fabToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+		});
+
+		/* —— 标记 body：在 ≤640 视口下，CSS 会把 TOC bar 浮到 header 替代 ticker —— */
+		document.body.classList.add('has-toc');
+
+		/* —— 阅读进度条：监听 scroll，把 0-100% 写到 .toc-progress-bar-fill width —— */
+		const progressFill = document.getElementById('toc-progress-bar-fill');
+		if (progressFill) {
+			let progressRaf = 0;
+			const updateProgress = () => {
+				const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+				const pct = Math.min(100, Math.max(0, (window.scrollY / max) * 100));
+				progressFill.style.width = pct.toFixed(2) + '%';
+			};
+			window.addEventListener(
+				'scroll',
+				() => {
+					if (progressRaf) return;
+					progressRaf = requestAnimationFrame(() => {
+						updateProgress();
+						progressRaf = 0;
+					});
+				},
+				{ passive: true },
+			);
+			updateProgress();
+		}
+	};
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initTOC);
+	} else {
+		initTOC();
+	}
+</script>
+
+<style is:global>
+	/* ━━━━━━━━━━ 桌面端：左侧贴边固定栏（≥1280） ━━━━━━━━━━ */
+	.toc-desktop {
+		position: fixed;
+		top: 0;
+		left: 16px;
+		width: 240px;
+		/* height 由 JS 完全接管（vh - top - bottomGap）—— 不在 CSS 里限 max-height，
+		   否则会跟 JS 计算的 height 打架（viewport 小于某值时 max-height 会赢，
+		   导致 TOC 没真正撑到 viewport 底） */
+		display: none;
+		padding: 0.9em 0.8em 0.8em;
+		background: rgba(255, 255, 255, 0.55);
+		backdrop-filter: blur(18px) saturate(180%);
+		-webkit-backdrop-filter: blur(18px) saturate(180%);
+		border: 1px solid rgba(255, 255, 255, 0.45);
+		border-radius: 18px;
+		box-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
+		z-index: 5;
+		flex-direction: column;
+		overflow: hidden;
+		/* 位置走 transform（GPU 合成），不走 top（layout 重排）—— scroll 时丝滑 */
+		transform: translateY(80px);
+		will-change: transform;
+	}
+	@media (min-width: 1280px) {
+		.toc-desktop:not([hidden]) {
+			display: flex;
+		}
+	}
+	@media (min-width: 1400px) {
+		.toc-desktop {
+			left: 24px;
+			width: 260px;
+		}
+	}
+	@media (min-width: 1600px) {
+		.toc-desktop {
+			left: 32px;
+			width: 280px;
+		}
+	}
+	/* 顶部胶囊：文章目录 */
+	.toc-head-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4em;
+		margin: 0 auto 0.9em;
+		padding: 0.4em 0.95em;
+		font-family: inherit;
+		font-size: 0.85em;
+		font-weight: 600;
+		color: #475569;
+		background: linear-gradient(135deg, rgba(226, 232, 240, 0.95), rgba(203, 213, 225, 0.95));
+		border: none;
+		border-radius: 999px;
+		box-shadow: 0 2px 8px rgba(255, 144, 192, 0.25);
+		cursor: default;
+		letter-spacing: 0.04em;
+	}
+	.toc-desktop .toc-list-wrap {
+		/* flex: 1 1 0 占满 .toc-desktop 中部空间（TOC 卡撑到 viewport 底，bottom 也贴底）；
+		   - 长目录：list 内部滚动
+		   - 短目录：ul 顶部对齐，下方是 list-wrap 内部空白 → 被 mask 渐变淡出 →
+		     视觉上像 cosZone/astro-koharu 那样 list 在中部、bottom 在底，无硬切空白感 */
+		flex: 1 1 0;
+		min-height: 0;
+		overflow-y: auto;
+		margin-right: -0.4em;
+		padding-right: 0.4em;
+		/* 底部 64px 长渐变 mask 让短目录的空白淡出更柔；
+		   顶部也加 8px 小渐变避免滚动时第一项被硬切 */
+		-webkit-mask-image: linear-gradient(180deg, transparent 0%, black 8px, black calc(100% - 64px), transparent 100%);
+		mask-image: linear-gradient(180deg, transparent 0%, black 8px, black calc(100% - 64px), transparent 100%);
+	}
+	.toc-desktop .toc-list-wrap::-webkit-scrollbar {
+		width: 4px;
+	}
+	.toc-desktop .toc-list-wrap::-webkit-scrollbar-thumb {
+		background: rgba(0, 0, 0, 0.12);
+		border-radius: 2px;
+	}
+
+	/* —— TOC 「未完全展开」时（hero 还在屏幕里）：底部三件套（上下篇 / footer / 进度条）淡出
+	   等 hero 滚出 / header 隐藏后 TOC 撑满 viewport 左侧才显示，
+	   视觉上像「目录从 hero 下方向下生长，到完全展开才解锁底部按钮」 */
+	.toc-desktop.is-collapsed .toc-prev-next,
+	.toc-desktop.is-collapsed .toc-footer,
+	.toc-desktop.is-collapsed .toc-progress-bar {
+		opacity: 0;
+		pointer-events: none;
+		transform: translateY(8px);
+	}
+	.toc-prev-next,
+	.toc-footer,
+	.toc-progress-bar {
+		transition:
+			opacity 0.22s ease,
+			transform 0.22s ease;
+	}
+
+	/* —— 上下篇切换 ——
+	   不再需要 margin-top: auto —— list-wrap 已 flex: 1 1 0 吃完剩余空间，
+	   prev-next 自然紧贴 list-wrap 底（视觉上也就是 viewport 底） */
+	.toc-prev-next {
+		display: flex;
+		gap: 0.4em;
+		padding-top: 0.6em;
+		flex-shrink: 0;
+	}
+	.toc-pn {
+		flex: 1 1 0;
+		min-width: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.4em;
+		padding: 0.45em 0.6em;
+		font-size: 0.74em;
+		text-decoration: none;
+		color: rgb(var(--gray-dark));
+		background: rgba(255, 255, 255, 0.45);
+		border: 1px solid rgba(255, 255, 255, 0.55);
+		border-radius: 10px;
+		transition:
+			background 0.2s ease,
+			transform 0.15s ease,
+			box-shadow 0.2s ease;
+		overflow: hidden;
+	}
+	.toc-pn:hover {
+		background: rgba(255, 144, 192, 0.18);
+		color: #475569;
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(255, 144, 192, 0.2);
+	}
+	.toc-pn-disabled {
+		opacity: 0;
+		pointer-events: none;
+	}
+	.toc-pn .pn-arrow {
+		font-size: 1.4em;
+		line-height: 1;
+		color: rgba(var(--accent-dark, 0, 13, 138), 0.5);
+		flex-shrink: 0;
+	}
+	.toc-pn:hover .pn-arrow {
+		color: #475569;
+	}
+	.toc-pn .pn-label {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.1em;
+		overflow: hidden;
+	}
+	.toc-pn-next .pn-label {
+		text-align: right;
+	}
+	.toc-pn .pn-hint {
+		font-size: 0.78em;
+		color: rgb(var(--gray));
+		letter-spacing: 0.05em;
+	}
+	.toc-pn .pn-title {
+		font-weight: 500;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	/* —— 底部跳转按钮组 ——
+	   margin-top 已被上下篇区接管；这里靠 .toc-prev-next 自身的 margin-top: auto 一起到底 */
+	.toc-footer {
+		display: flex;
+		gap: 0.45em;
+		margin-top: 0.5em;
+		padding-top: 0.4em;
+		flex-shrink: 0;
+	}
+
+	/* —— 阅读进度条 ——
+	   贴 .toc-desktop 最底；客户端 JS 监听 scroll 设 width */
+	.toc-progress-bar {
+		height: 3px;
+		margin-top: 0.6em;
+		background: rgba(0, 0, 0, 0.06);
+		border-radius: 999px;
+		overflow: hidden;
+		flex-shrink: 0;
+	}
+	.toc-progress-bar-fill {
+		height: 100%;
+		width: 0%;
+		background: #94a3b8;
+		border-radius: 999px;
+		transition: width 0.15s ease-out;
+		will-change: width;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.toc-progress-bar-fill {
+			transition: none;
+		}
+	}
+	.toc-action {
+		flex: 1;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.35em;
+		padding: 0.5em 0.4em;
+		font-family: inherit;
+		font-size: 0.78em;
+		font-weight: 500;
+		color: #475569;
+		background: rgba(226, 232, 240, 0.5);
+		border: 1px solid rgba(255, 144, 192, 0.35);
+		border-radius: 10px;
+		cursor: pointer;
+		transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+	}
+	.toc-action:hover {
+		background: rgba(203, 213, 225, 0.85);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(255, 144, 192, 0.25);
+	}
+	.toc-action svg {
+		flex-shrink: 0;
+	}
+
+	/* ━━━━━━━━━━ 列表项通用样式 ━━━━━━━━━━ */
+	.toc-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.toc-item {
+		margin: 0;
+		position: relative;
+	}
+	.toc-item a {
+		display: flex;
+		gap: 0.45em;
+		align-items: baseline;
+		padding: 0.5em 0.85em;
+		border-radius: 10px;
+		color: rgb(var(--gray-dark));
+		text-decoration: none;
+		font-size: 0.92em;
+		line-height: 1.45;
+		transition: background 0.18s ease, color 0.18s ease;
+	}
+	.toc-item a:hover {
+		background: rgba(255, 144, 192, 0.08);
+		color: #475569;
+	}
+	.toc-num {
+		flex-shrink: 0;
+		min-width: 1.6em;
+		color: rgb(var(--gray));
+		font-variant-numeric: tabular-nums;
+		font-weight: 500;
+	}
+	.toc-text {
+		flex: 1;
+		min-width: 0;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	/* h3：缩进 + 稍小 + 灰一点 */
+	.toc-l3 a {
+		padding-left: 1.9em;
+		font-size: 0.84em;
+		color: rgb(var(--gray));
+	}
+	.toc-l3 .toc-num {
+		min-width: 2.4em;
+		font-size: 0.92em;
+	}
+	/* 主动态：粉色胶囊 + 右侧小圆点 */
+	.toc-item.is-active a {
+		background: linear-gradient(135deg, rgba(226, 232, 240, 0.95), rgba(203, 213, 225, 0.85));
+		color: #475569 !important;
+		font-weight: 600;
+	}
+	.toc-item.is-active .toc-num {
+		color: #475569;
+		font-weight: 600;
+	}
+	.toc-item.is-active a::after {
+		content: '';
+		flex-shrink: 0;
+		width: 5px;
+		height: 5px;
+		border-radius: 50%;
+		background: #475569;
+		margin-left: 0.3em;
+		align-self: center;
+	}
+
+	/* ━━━━━━━━━━ 移动端：顶部胶囊触发器 + 下拉面板（<1280） ━━━━━━━━━━ */
+	.toc-mobile {
+		display: none;
+		position: sticky;
+		/* 80px = 实际 header 高度（与桌面 TOC JS 里的 stickyTop=80 对齐）
+		   旧值 64 比 header 矮 16px → 胶囊上半会被 header 盖住 */
+		top: 80px;
+		z-index: 9;
+		width: min(840px, 100% - 2em);
+		margin: 0 auto 0.8em;
+		/* top 联动 body.header-hidden 切换 / opacity+transform 联动 is-revealed 切换 */
+		transition:
+			top 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+			opacity 0.32s ease,
+			transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	/* 未揭示态（默认）：胶囊隐藏。给 icon-only nav 留出独立的视觉空间，
+	   等用户真正滚到第一个标题（recompute 添加 .is-revealed）时才滑出来「接班」 */
+	.toc-mobile:not(.is-revealed) {
+		opacity: 0;
+		pointer-events: none;
+		transform: translateY(-8px);
+	}
+	@media (max-width: 1279px) {
+		.toc-mobile:not([hidden]) {
+			display: block;
+		}
+	}
+	/* 中等视口：header 隐藏时，TOC 胶囊滑进 header 留出的空位
+	   （≤640 由后面 fixed + translateY 单独处理，所以这里限定下界 641） */
+	@media (min-width: 641px) and (max-width: 1279px) {
+		body.has-toc.header-hidden .toc-mobile {
+			top: 8px;
+		}
+	}
+	@media (min-width: 1400px) {
+		.toc-mobile {
+			width: min(960px, 100% - 4em);
+		}
+	}
+	.toc-mobile-trigger {
+		display: flex;
+		align-items: center;
+		gap: 0.6em;
+		width: 100%;
+		padding: 0.5em 0.9em;
+		font-family: inherit;
+		font-size: 0.9em;
+		color: rgb(var(--gray-dark));
+		background: rgba(255, 255, 255, 0.82);
+		backdrop-filter: blur(12px) saturate(170%);
+		-webkit-backdrop-filter: blur(12px) saturate(170%);
+		border: 1px solid rgba(255, 255, 255, 0.7);
+		border-radius: 999px;
+		box-shadow: 0 2px 8px rgba(31, 38, 135, 0.08);
+		cursor: pointer;
+		text-align: left;
+		transition: background 0.15s ease, box-shadow 0.15s ease;
+	}
+	.toc-mobile-trigger:hover {
+		background: rgba(255, 255, 255, 0.95);
+	}
+	.toc-mobile-current {
+		flex: 1;
+		min-width: 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.toc-chevron {
+		flex-shrink: 0;
+		color: rgb(var(--gray));
+		transition: transform 0.2s ease;
+	}
+	.toc-mobile.is-open .toc-chevron {
+		transform: rotate(180deg);
+	}
+	.toc-mobile-panel {
+		position: absolute;
+		top: calc(100% + 6px);
+		left: 0;
+		right: 0;
+		max-height: 60vh;
+		overflow-y: auto;
+		padding: 0.5em;
+		background: rgba(255, 255, 255, 0.96);
+		backdrop-filter: blur(16px) saturate(180%);
+		-webkit-backdrop-filter: blur(16px) saturate(180%);
+		border: 1px solid rgba(255, 255, 255, 0.7);
+		border-radius: 14px;
+		box-shadow: 0 12px 36px rgba(31, 38, 135, 0.2);
+		opacity: 0;
+		transform: translateY(-6px);
+		pointer-events: none;
+		transition: opacity 0.18s ease, transform 0.18s ease;
+	}
+	.toc-mobile.is-open .toc-mobile-panel {
+		opacity: 1;
+		transform: translateY(0);
+		pointer-events: auto;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.toc-chevron,
+		.toc-mobile-panel {
+			transition: none;
+		}
+	}
+
+	/* ━━━ ≤720 视口：TOC bar 通过 fixed 浮到 header 位置占替代 ticker ━━━
+	   原本只 ≤640 走这套；后来把整个 hamburger 范围（≤720）统一为一套布局，
+	   所以 TOC 胶囊的 fixed 浮层规则也跟着扩展到 ≤720 */
+	@media (max-width: 720px) {
+		/* 隐藏原 ticker（最近文章），让 TOC bar 占位 */
+		body.has-toc header .ticker {
+			display: none !important;
+		}
+		body.has-toc .toc-mobile {
+			position: fixed !important;
+			/* 浮条字号 0.9em + 3em 高 + 1px×2 描边 ≈ 48px；
+			   在 68px header 中居中：(68-48)/2 = 10px */
+			top: 10px;
+			/* 让出 hamburger / 搜索按钮加大后的占位 */
+			left: 72px;
+			right: 64px;
+			width: auto !important;
+			max-width: none;
+			margin: 0 !important;
+			z-index: 11;
+			transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+		/* 跟着 header 一起隐藏（header.is-hidden → body.header-hidden） */
+		body.has-toc.header-hidden .toc-mobile {
+			transform: translateY(-160%);
+		}
+		/* trigger 改成 ticker 同款玻璃胶囊，加高让胶囊更厚实 */
+		body.has-toc .toc-mobile-trigger {
+			height: 3em;
+			padding: 0 0.85em 0 0.7em;
+			font-size: 0.9em;
+			background: rgba(255, 255, 255, 0.5);
+			border: 1px solid rgba(255, 255, 255, 0.55);
+			box-shadow:
+				inset 0 1px 2px rgba(255, 255, 255, 0.4),
+				inset 0 -1px 2px rgba(31, 38, 135, 0.04),
+				0 1px 4px rgba(31, 38, 135, 0.08);
+		}
+		/* 当前章节标题左对齐——与左侧的进度环紧贴呼应 */
+		body.has-toc .toc-mobile-current {
+			text-align: left;
+		}
+		/* 进度环动画过渡：让填充更顺滑，避免每次微小滚动都跳跃 */
+		.toc-progress-arc {
+			transition: stroke-dashoffset 0.15s linear;
+		}
+		@media (prefers-reduced-motion: reduce) {
+			.toc-progress-arc {
+				transition: none;
+			}
+		}
+		/* 下拉面板从胶囊底部对齐左右 */
+		body.has-toc .toc-mobile-panel {
+			left: 0;
+			right: 0;
+			top: calc(100% + 6px);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		body.has-toc .toc-mobile {
+			transition: none !important;
+		}
+	}
+
+	/* 锚点滚动时给标题留出一点 padding（不被 header 盖住） */
+	.prose h2,
+	.prose h3 {
+		scroll-margin-top: 80px;
+	}
+
+	/* ━━━━━━━━━━ 右下角浮动按钮组 FAB ━━━━━━━━━━ */
+	.toc-fab {
+		position: fixed;
+		right: 20px;
+		bottom: 24px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+		z-index: 30;
+	}
+	/* 桌面已经有 sidebar 内的按钮，FAB 收起减少重复 */
+	@media (min-width: 1280px) {
+		.toc-fab {
+			display: none;
+		}
+	}
+	.toc-fab-btn {
+		width: 48px;
+		height: 48px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+		font-family: inherit;
+		color: #475569;
+		background: rgba(255, 255, 255, 0.85);
+		border: 1px solid rgba(255, 144, 192, 0.3);
+		border-radius: 50%;
+		backdrop-filter: blur(10px) saturate(170%);
+		-webkit-backdrop-filter: blur(10px) saturate(170%);
+		box-shadow: 0 4px 12px rgba(31, 38, 135, 0.12);
+		cursor: pointer;
+		transition: background 0.15s ease, transform 0.18s ease, box-shadow 0.15s ease, opacity 0.18s ease;
+	}
+	.toc-fab-btn:hover {
+		background: linear-gradient(135deg, rgba(226, 232, 240, 0.95), rgba(203, 213, 225, 0.9));
+		transform: translateY(-2px);
+		box-shadow: 0 6px 16px rgba(255, 144, 192, 0.3);
+	}
+	.toc-fab-toggle {
+		color: rgb(var(--gray));
+	}
+	.toc-fab-toggle:hover {
+		background: rgba(0, 0, 0, 0.06);
+		color: rgb(var(--gray-dark));
+	}
+	/* 切换按钮里两个图标：默认显示 × ，折叠后显示菜单图标 */
+	.toc-fab-icon-open {
+		display: none;
+	}
+	.toc-fab.is-collapsed .toc-fab-icon-close {
+		display: none;
+	}
+	.toc-fab.is-collapsed .toc-fab-icon-open {
+		display: block;
+	}
+	/* 折叠状态：滚动按钮缩小+淡出+脱离布局，切换按钮变小做"提手" */
+	.toc-fab.is-collapsed .toc-fab-scroll {
+		transform: scale(0);
+		opacity: 0;
+		margin-top: -56px; /* 抵消 gap + 自身高度，让布局塌缩 */
+		pointer-events: none;
+	}
+	.toc-fab.is-collapsed .toc-fab-toggle {
+		width: 40px;
+		height: 40px;
+		color: #475569;
+		background: linear-gradient(135deg, rgba(226, 232, 240, 0.9), rgba(203, 213, 225, 0.85));
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.toc-fab-btn,
+		.toc-fab.is-collapsed .toc-fab-scroll {
+			transition: none;
+		}
+	}
+</style>

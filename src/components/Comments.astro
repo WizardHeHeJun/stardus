@@ -1,0 +1,135 @@
+---
+import { GISCUS } from '../consts';
+
+interface Props {
+	mapping?: 'pathname' | 'specific' | 'title' | 'url';
+	term?: string;
+	title?: string;
+	hint?: string;
+}
+
+const {
+	mapping = 'pathname',
+	term,
+	title = '💬 留下你的想法',
+	hint = '用 GitHub 账号登录，留个表情或写两句都好。',
+} = Astro.props;
+
+const dataTerm = mapping === 'specific' ? term : undefined;
+
+// Whether giscus is configured (all 4 IDs filled). If not, render a placeholder card instead.
+const giscusReady = !!(GISCUS.repo && GISCUS.repoId && GISCUS.category && GISCUS.categoryId);
+
+// giscus custom theme needs an HTTPS absolute URL (loaded inside the iframe across origins).
+// In dev, localhost is HTTP and will be blocked by mixed-content; fall back to the built-in `light` theme.
+// Build timestamp acts as cache buster so giscus iframes don't cache stale CSS.
+const siteOrigin = (Astro.site?.toString() || '').replace(/\/$/, '');
+const themeVersion = Math.floor(Date.now() / 1000);
+const giscusTheme = import.meta.env.DEV || !siteOrigin
+	? 'light'
+	: `${siteOrigin}/giscus-theme.css?v=${themeVersion}`;
+---
+
+<section class="comments-card">
+	<h2 class="comments-title">{title}</h2>
+	<p class="comments-hint">{hint}</p>
+	{giscusReady ? (
+		<div class="giscus-mount">
+			<script
+				is:inline
+				src="https://giscus.app/client.js"
+				data-repo={GISCUS.repo}
+				data-repo-id={GISCUS.repoId}
+				data-category={GISCUS.category}
+				data-category-id={GISCUS.categoryId}
+				data-mapping={mapping}
+				data-term={dataTerm}
+				data-strict="0"
+				data-reactions-enabled="1"
+				data-emit-metadata="0"
+				data-input-position="bottom"
+				data-theme={giscusTheme}
+				data-lang="zh-CN"
+				data-loading="lazy"
+				crossorigin="anonymous"
+				async></script>
+		</div>
+	) : (
+		<div class="giscus-empty">
+			<p>评论功能未启用</p>
+			<p class="empty-sub">
+				在 <code>src/consts.ts</code> 填好 <code>GISCUS</code> 配置后启用。配置教程见 <a href="https://giscus.app" target="_blank" rel="noopener">giscus.app</a>。
+			</p>
+		</div>
+	)}
+</section>
+
+<style>
+	.comments-card {
+		width: 100%;
+		padding: 1.8em 2em;
+		/* 用固定的「水色 → 浅粉」渐变底打底，再叠 backdrop blur 加质感。
+		   这样不论背后 bg.jpg 滚到什么色段（about 暖 / friends 冷），
+		   叠加后都能稳定在统一的水玻璃调上。 */
+		background:
+			linear-gradient(135deg,
+				rgba(207, 233, 255, 0.35) 0%,
+				rgba(255, 230, 240, 0.30) 100%);
+		backdrop-filter: blur(20px) saturate(110%);
+		-webkit-backdrop-filter: blur(20px) saturate(110%);
+		border: 1px solid rgba(255, 255, 255, 0.45);
+		border-radius: 18px;
+		box-shadow: 0 4px 18px rgba(31, 38, 135, 0.08);
+		box-sizing: border-box;
+	}
+	.comments-title {
+		margin: 0 0 0.4em;
+		font-size: 1.3em;
+		color: rgb(var(--gray-dark));
+	}
+	.comments-hint {
+		margin: 0 0 1.2em;
+		color: rgb(var(--gray));
+		font-size: 0.9em;
+		line-height: 1.6;
+	}
+	.giscus-mount {
+		min-height: 150px;
+	}
+	.giscus-mount :global(.giscus-frame) {
+		width: 100%;
+		border: none;
+		color-scheme: light;
+	}
+	.giscus-empty {
+		padding: 1.4em 1.2em;
+		background: rgba(255, 255, 255, 0.45);
+		border: 1px dashed rgba(35, 55, 255, 0.18);
+		border-radius: 12px;
+		text-align: center;
+		color: rgb(var(--gray));
+	}
+	.giscus-empty p {
+		margin: 0.2em 0;
+		font-size: 0.92em;
+	}
+	.giscus-empty .empty-sub {
+		font-size: 0.82em;
+		color: rgb(var(--gray));
+		opacity: 0.85;
+	}
+	.giscus-empty code {
+		padding: 0.05em 0.4em;
+		background: rgba(0, 0, 0, 0.06);
+		border-radius: 4px;
+		font-size: 0.9em;
+	}
+	.giscus-empty a {
+		color: var(--accent);
+	}
+	@media (max-width: 640px) {
+		.comments-card {
+			padding: 1.4em 1.2em;
+		}
+	}
+</style>

@@ -1,0 +1,212 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import elysiaAvatar from '../assets/elysia.png';
+import { SITE_TITLE } from '../consts';
+
+const posts = await getCollection('blog');
+const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const recent = sortedPosts.slice(0, 5);
+
+const categoryCount = new Set(posts.map((p) => p.data.category)).size;
+const tagCount = new Set(posts.flatMap((p) => p.data.tags)).size;
+---
+
+<aside class="sidebar">
+	<!-- Profile -->
+	<div class="card">
+		<Image src={elysiaAvatar} width={120} height={120} alt="头像" class="avatar" />
+		<h3 class="name">{SITE_TITLE}</h3>
+		<p class="bio">一句简短的自我介绍。</p>
+		<div class="socials">
+			<!-- 把下面的 href="#" 替换成你自己的链接 -->
+			<a href="#" target="_blank" rel="noopener" aria-label="GitHub">
+				<svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20"
+					><path
+						fill="currentColor"
+						d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+					></path></svg
+				>
+			</a>
+			<a href="#" target="_blank" rel="noopener" aria-label="Twitter">
+				<svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20"
+					><path
+						fill="currentColor"
+						d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"
+					></path></svg
+				>
+			</a>
+			<a href="#" aria-label="邮件">
+				<svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20"
+					><path
+						fill="currentColor"
+						d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4.236-8 4.882-8-4.882V6l8 4.882L20 6v2.236z"
+					></path></svg
+				>
+			</a>
+		</div>
+	</div>
+
+	<!-- Stats -->
+	<div class="card">
+		<div class="stats">
+			<div class="stat">
+				<div class="num">{posts.length}</div>
+				<div class="label">文章</div>
+			</div>
+			<div class="stat">
+				<div class="num">{categoryCount}</div>
+				<div class="label">分类</div>
+			</div>
+			<div class="stat">
+				<div class="num">{tagCount}</div>
+				<div class="label">标签</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Recent Posts -->
+	<div class="card">
+		<h4 class="card-title">最近文章</h4>
+		<ul class="recent-list">
+			{
+				recent.map((p) => (
+					<li>
+						<a href={`/blog/${p.id}/`}>{p.data.title}</a>
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</aside>
+
+<style>
+	.sidebar {
+		display: flex;
+		flex-direction: column;
+		gap: 1em;
+	}
+	.card {
+		padding: 1.2em;
+		background: rgba(255, 255, 255, 0.5);
+		border: 1px solid rgba(255, 255, 255, 0.45);
+		border-radius: 14px;
+		backdrop-filter: blur(12px) saturate(160%);
+		-webkit-backdrop-filter: blur(12px) saturate(160%);
+		box-shadow: 0 4px 16px rgba(31, 38, 135, 0.08);
+	}
+	.avatar {
+		display: block;
+		margin: 0 auto 0.6em;
+		border-radius: 50%;
+		width: 100px;
+		height: 100px;
+		object-fit: cover;
+		cursor: pointer;
+		will-change: transform;
+	}
+	.avatar:hover {
+		animation: avatar-wiggle 0.6s cubic-bezier(0.36, 0, 0.45, 1.4);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.avatar:hover {
+			animation: none;
+		}
+	}
+	.name {
+		text-align: center;
+		margin: 0 0 0.4em;
+		font-size: 1.15em;
+	}
+	.bio {
+		text-align: center;
+		margin: 0 0 0.8em;
+		font-size: 0.85em;
+		color: rgb(var(--gray));
+		line-height: 1.5;
+	}
+	.socials {
+		display: flex;
+		justify-content: center;
+		gap: 0.6em;
+		flex-wrap: wrap;
+	}
+	.socials a {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 34px;
+		height: 34px;
+		background: rgba(35, 55, 255, 0.08);
+		border-radius: 50%;
+		color: var(--accent);
+		text-decoration: none;
+		transition: background 0.15s ease, transform 0.15s ease;
+	}
+	.socials a:hover {
+		background: rgba(35, 55, 255, 0.18);
+		transform: translateY(-2px);
+	}
+	.socials svg {
+		display: block;
+	}
+	.stats {
+		display: flex;
+		justify-content: space-around;
+		gap: 0.6em;
+	}
+	.stat {
+		text-align: center;
+	}
+	.num {
+		font-size: 1.6em;
+		font-weight: 600;
+		color: var(--accent);
+		line-height: 1;
+	}
+	.label {
+		font-size: 0.8em;
+		color: rgb(var(--gray));
+		margin-top: 0.3em;
+	}
+	.card-title {
+		margin: 0 0 0.8em;
+		font-size: 1em;
+		color: rgb(var(--gray-dark));
+	}
+	.recent-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5em;
+	}
+	.recent-list a {
+		font-size: 0.9em;
+		color: rgb(var(--gray-dark));
+		text-decoration: none;
+		display: -webkit-box;
+		-webkit-line-clamp: 1;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		transition: color 0.15s ease;
+	}
+	.recent-list a:hover {
+		color: var(--accent);
+	}
+	/* —— 中等分辨率（641-960，平板/竖屏）：sidebar 折到顶部，3 卡横向铺开 —— */
+	@media (max-width: 960px) {
+		.sidebar {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+			gap: 0.8em;
+		}
+	}
+	/* —— 移动 (≤640)：隐藏 sidebar，让博客列表直接铺到顶 —— */
+	@media (max-width: 640px) {
+		.sidebar {
+			display: none;
+		}
+	}
+</style>

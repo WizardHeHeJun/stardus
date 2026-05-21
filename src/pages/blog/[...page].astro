@@ -1,0 +1,361 @@
+---
+import HeroImage from '../../components/HeroImage.astro';
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Header from '../../components/Header.astro';
+import Pagination from '../../components/Pagination.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { calcReadingStats } from '../../utils/reading-time';
+
+export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
+	const posts = (await getCollection('blog')).sort((a, b) => {
+		if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+		return b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
+	});
+	return paginate(posts, { pageSize: 6 });
+};
+
+const { page } = Astro.props;
+
+const postsWithStats = page.data.map((p) => ({
+	post: p,
+	stats: calcReadingStats(p.body ?? ''),
+}));
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead
+			title={page.currentPage === 1 ? SITE_TITLE : `第 ${page.currentPage} 页 · ${SITE_TITLE}`}
+			description={SITE_DESCRIPTION}
+		/>
+		<style>
+			main {
+				width: min(1100px, 100% - 2em);
+				background: transparent;
+				backdrop-filter: none;
+				-webkit-backdrop-filter: none;
+				border: none;
+				border-radius: 0;
+				box-shadow: none;
+				padding: 1.5em 1em;
+				display: grid;
+				grid-template-columns: 280px minmax(0, 1fr);
+				gap: 1.5em;
+				align-items: start;
+			}
+			@media (min-width: 1400px) {
+				main {
+					width: min(1500px, 100% - 4em);
+					grid-template-columns: 320px minmax(0, 1fr);
+				}
+			}
+			@media (min-width: 1800px) {
+				main {
+					width: min(1680px, 100% - 4em);
+				}
+			}
+			.posts-card {
+				padding: 1.8em 1.6em;
+				background: rgba(255, 255, 255, 0.55);
+				backdrop-filter: blur(18px) saturate(180%);
+				-webkit-backdrop-filter: blur(18px) saturate(180%);
+				border: 1px solid rgba(255, 255, 255, 0.45);
+				border-radius: 18px;
+				box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+			}
+
+			/* —— 列表容器 —— */
+			ul {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 1.2em;
+			}
+
+			/* —— 单张卡片：图左 320 + 文右 —— */
+			.post-card a {
+				display: grid;
+				grid-template-columns: 320px minmax(0, 1fr);
+				gap: 1.5em;
+				padding: 1.2em;
+				background: rgba(255, 255, 255, 0.45);
+				border: 1px solid rgba(255, 255, 255, 0.5);
+				border-radius: 16px;
+				text-decoration: none;
+				color: rgb(var(--gray-dark));
+				overflow: hidden;
+				transition:
+					transform 0.2s ease,
+					box-shadow 0.2s ease,
+					background 0.2s ease;
+			}
+			/* 偶数项：图右文左 */
+			.post-card:nth-child(even) a {
+				grid-template-columns: minmax(0, 1fr) 320px;
+			}
+			.post-card:nth-child(even) .card-media {
+				order: 2;
+			}
+
+			.card-media {
+				overflow: hidden;
+				border-radius: 12px;
+				aspect-ratio: 16 / 10;
+				background: rgba(0, 0, 0, 0.04);
+			}
+			:global(.card-media img) {
+				transition: transform 0.3s ease;
+			}
+			.card-media-placeholder {
+				width: 100%;
+				height: 100%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 2.4em;
+				opacity: 0.3;
+			}
+
+			.card-body {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				min-width: 0;
+			}
+			.title {
+				margin: 0 0 0.4em;
+				color: rgb(var(--black));
+				font-size: 1.25em;
+				line-height: 1.3;
+				transition: color 0.15s ease;
+			}
+			.meta {
+				margin: 0 0 0.5em;
+				color: rgb(var(--gray));
+				font-size: 0.82em;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.4em;
+				align-items: center;
+			}
+			.meta .dot {
+				opacity: 0.5;
+			}
+			.excerpt {
+				margin: 0;
+				color: rgb(var(--gray-dark));
+				font-size: 0.92em;
+				line-height: 1.55;
+				display: -webkit-box;
+				-webkit-line-clamp: 2;
+				-webkit-box-orient: vertical;
+				overflow: hidden;
+				opacity: 0.85;
+			}
+			.more {
+				display: inline-block;
+				margin-top: 0.7em;
+				font-size: 0.85em;
+				color: var(--accent);
+				opacity: 0;
+				transform: translateX(-4px);
+				transition:
+					opacity 0.2s ease,
+					transform 0.2s ease;
+			}
+			.pin-badge {
+				display: inline-block;
+				font-size: 0.6em;
+				padding: 0.2em 0.6em;
+				margin-right: 0.5em;
+				background: rgba(255, 200, 100, 0.3);
+				border: 1px solid rgba(255, 180, 80, 0.6);
+				border-radius: 999px;
+				color: #b8860b;
+				vertical-align: middle;
+				font-weight: 600;
+			}
+
+			/* —— hover：卡片上抬 + 图抖一下 —— */
+			.post-card a:hover {
+				transform: translateY(-4px);
+				background: rgba(255, 255, 255, 0.7);
+				box-shadow: 0 12px 36px rgba(31, 38, 135, 0.22);
+			}
+			.post-card a:hover .title {
+				color: var(--accent);
+			}
+			:global(.post-card a:hover .card-media img) {
+				animation: card-wiggle 0.5s ease;
+			}
+			.post-card a:hover .more {
+				opacity: 1;
+				transform: translateX(0);
+			}
+			@keyframes card-wiggle {
+				0%, 100% { transform: scale(1) rotate(0deg); }
+				20%      { transform: scale(1.05) rotate(-1.2deg); }
+				60%      { transform: scale(1.05) rotate(1.2deg); }
+				80%      { transform: scale(1.05) rotate(-0.6deg); }
+			}
+			/* —— active：按下反馈 —— */
+			.post-card a:active {
+				transform: scale(0.985) translateY(-2px);
+				box-shadow: 0 4px 12px rgba(31, 38, 135, 0.15);
+			}
+
+			/* —— 置顶博文：全宽大图 + 大标题 + 暖色背景，凸显「置顶」 —— */
+			.post-card.featured a {
+				grid-template-columns: 1fr;
+				padding: 1.5em;
+				background: linear-gradient(135deg, rgba(255, 240, 200, 0.55), rgba(255, 255, 255, 0.55));
+				border: 1px solid rgba(255, 180, 80, 0.45);
+				box-shadow: 0 8px 32px rgba(255, 180, 80, 0.15);
+			}
+			.post-card.featured .card-media {
+				aspect-ratio: 21 / 9;
+				margin-bottom: 0.4em;
+				order: 0 !important;
+			}
+			.post-card.featured .card-body {
+				justify-content: flex-start;
+			}
+			.post-card.featured .title {
+				font-size: 1.55em;
+			}
+			.post-card.featured .pin-badge {
+				font-size: 0.65em;
+			}
+			.post-card.featured a:hover {
+				background: linear-gradient(135deg, rgba(255, 230, 180, 0.7), rgba(255, 255, 255, 0.75));
+			}
+
+			/* —— 桌面默认 (961-1280)：sidebar 在场，图缩到 240 给文字列更多呼吸空间 —— */
+			@media (min-width: 961px) and (max-width: 1280px) {
+				.post-card a {
+					grid-template-columns: 240px minmax(0, 1fr);
+					gap: 1.2em;
+				}
+				.post-card:nth-child(even) a {
+					grid-template-columns: minmax(0, 1fr) 240px;
+				}
+			}
+			/* —— 平板 (≤960)：sidebar 已隐藏，卡片图缩小，奇偶交替保留 —— */
+			@media (max-width: 960px) {
+				main {
+					grid-template-columns: 1fr;
+				}
+				.post-card a {
+					grid-template-columns: 220px minmax(0, 1fr);
+				}
+				.post-card:nth-child(even) a {
+					grid-template-columns: minmax(0, 1fr) 220px;
+				}
+				/* 置顶仍保持全宽大图 */
+				.post-card.featured a {
+					grid-template-columns: 1fr;
+				}
+				.post-card.featured .title {
+					font-size: 1.35em;
+				}
+			}
+			/* —— 移动 (≤640)：图上文下，所有卡片统一 —— */
+			@media (max-width: 640px) {
+				main {
+					width: min(1100px, 100% - 0.8em);
+					padding: 1em 0.4em;
+					grid-template-columns: 1fr;
+					gap: 1em;
+				}
+				.posts-card {
+					padding: 1.2em 1em;
+				}
+				.post-card a,
+				.post-card:nth-child(even) a {
+					grid-template-columns: 1fr;
+					gap: 0.8em;
+				}
+				.post-card:nth-child(even) .card-media {
+					order: 0;
+				}
+				.card-media {
+					aspect-ratio: 16 / 9;
+				}
+				.title {
+					font-size: 1.1em;
+				}
+				.post-card.featured .title {
+					font-size: 1.2em;
+				}
+			}
+			/* —— 减少动画偏好用户：跳过 wiggle —— */
+			@media (prefers-reduced-motion: reduce) {
+				.post-card a {
+					transition: none;
+				}
+				:global(.post-card a:hover .card-media img) {
+					animation: none;
+				}
+				:global(.card-media img) {
+					transition: none;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<Sidebar />
+			<section class="posts-card">
+				<ul>
+					{
+						postsWithStats.map(({ post, stats }) => (
+							<li class={`post-card${post.data.featured ? ' featured' : ''}`}>
+								<a href={`/blog/${post.id}/`}>
+									<div class="card-media">
+										{post.data.heroImage ? (
+											<HeroImage slug={post.id} src={post.data.heroImage} width={640} height={400} />
+										) : (
+											<div class="card-media-placeholder">✨</div>
+										)}
+									</div>
+									<div class="card-body">
+										<p class="meta">
+											<FormattedDate date={post.data.pubDate} />
+											<span class="dot">·</span>
+											<span>{stats.wordCount} 字</span>
+											<span class="dot">·</span>
+											<span>{stats.readingTime} 分钟</span>
+										</p>
+										<h4 class="title">
+											{post.data.featured && <span class="pin-badge">📌 置顶</span>}
+											{post.data.title}
+										</h4>
+										<p class="excerpt">{post.data.description}</p>
+										<span class="more">阅读全文 →</span>
+									</div>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+				<Pagination
+					currentPage={page.currentPage}
+					totalPages={page.lastPage}
+					prevUrl={page.url.prev}
+					nextUrl={page.url.next}
+					baseUrl="/blog/"
+				/>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

@@ -1,0 +1,200 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`404 · ${SITE_TITLE}`} description="这一页好像不在这里。" />
+	</head>
+	<body>
+		<Header />
+		<main class="not-found">
+			<!-- 飘动的小装饰 -->
+			<div class="sparkles" aria-hidden="true">
+				<span class="s s1">✦</span>
+				<span class="s s2">✧</span>
+				<span class="s s3">✦</span>
+				<span class="s s4">✧</span>
+				<span class="s s5">✦</span>
+				<span class="s s6">✧</span>
+			</div>
+
+			<!-- 主体：4 0 4 -->
+			<div class="big-404">
+				<span class="digit d-left">4</span>
+				<span class="digit digit-zero" aria-label="0">0</span>
+				<span class="digit d-right">4</span>
+			</div>
+
+			<h1 class="line1">这一页可能跑去别的地方了</h1>
+			<p class="line2">
+				链接可能失效了，或者页面已经移动。<br />
+				试试下面的入口吧。
+			</p>
+
+			<div class="actions">
+				<a href="/" class="btn primary">🏠 回首页</a>
+				<a href="/blog/" class="btn">📚 去博客</a>
+				<button class="btn ghost" id="back-btn" type="button">↩ 返回上一页</button>
+			</div>
+
+			<p class="footer-tip">如果你确定这个链接应该有内容，告诉我一声。</p>
+		</main>
+		<Footer />
+
+		<script is:inline>
+			const back = document.getElementById('back-btn');
+			back?.addEventListener('click', () => history.back());
+		</script>
+
+		<style>
+			main.not-found {
+				text-align: center;
+				position: relative;
+				overflow: hidden;
+				min-height: 60vh;
+			}
+
+			/* —— 大数字 + 头像中间位 —— */
+			.big-404 {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 0.1em;
+				margin: 1em 0 0.5em;
+				line-height: 1;
+				user-select: none;
+			}
+			.digit {
+				font-size: clamp(6em, 18vw, 12em);
+				font-weight: 800;
+				background: linear-gradient(135deg, #ff90c0 0%, #c280ff 50%, #7ab5ff 100%);
+				-webkit-background-clip: text;
+				background-clip: text;
+				color: transparent;
+				letter-spacing: -0.05em;
+				animation: float 3s ease-in-out infinite;
+				text-shadow: 0 4px 24px rgba(255, 144, 192, 0.3);
+			}
+			.d-left {
+				animation-delay: 0s;
+			}
+			.d-right {
+				animation-delay: 1.5s;
+			}
+			.digit-zero {
+				animation-delay: 0.75s;
+			}
+
+			/* —— 文字 —— */
+			.line1 {
+				font-size: 1.6em;
+				margin: 0.5em 0 0.3em;
+				color: rgb(var(--gray-dark));
+				font-weight: 600;
+			}
+			.line2 {
+				font-size: 1em;
+				color: rgb(var(--gray));
+				margin: 0 0 1.5em;
+				line-height: 1.7;
+			}
+
+			/* —— 按钮 —— */
+			.actions {
+				display: flex;
+				justify-content: center;
+				gap: 0.6em;
+				flex-wrap: wrap;
+				margin-bottom: 2em;
+			}
+			.btn {
+				display: inline-block;
+				padding: 0.6em 1.4em;
+				background: rgba(255, 255, 255, 0.55);
+				border: 1px solid rgba(255, 255, 255, 0.45);
+				border-radius: 999px;
+				color: rgb(var(--gray-dark));
+				text-decoration: none;
+				cursor: pointer;
+				font-family: inherit;
+				font-size: 1em;
+				transition:
+					background 0.18s ease,
+					transform 0.18s ease,
+					box-shadow 0.18s ease;
+			}
+			.btn:hover {
+				background: rgba(255, 255, 255, 0.85);
+				transform: translateY(-3px);
+				box-shadow: 0 6px 16px rgba(31, 38, 135, 0.15);
+			}
+			.btn.primary {
+				background: linear-gradient(135deg, #ff90c0, #7ab5ff);
+				color: white;
+				border-color: transparent;
+			}
+			.btn.primary:hover {
+				background: linear-gradient(135deg, #ff70a8, #5a98e8);
+			}
+			.btn.ghost {
+				background: transparent;
+				border-color: rgba(0, 0, 0, 0.1);
+			}
+			.footer-tip {
+				color: rgb(var(--gray));
+				font-size: 0.85em;
+				margin: 0;
+				opacity: 0.8;
+			}
+
+			/* —— 飘动的小装饰 —— */
+			.sparkles {
+				position: absolute;
+				inset: 0;
+				pointer-events: none;
+			}
+			.s {
+				position: absolute;
+				font-size: 1.5em;
+				color: #c280ff;
+				opacity: 0.5;
+				animation: drift 8s ease-in-out infinite;
+			}
+			.s1 { top: 10%; left: 15%; animation-delay: 0s; }
+			.s2 { top: 20%; right: 12%; animation-delay: 1s; color: #ff90c0; font-size: 1.2em; }
+			.s3 { bottom: 30%; left: 8%; animation-delay: 2s; color: #7ab5ff; font-size: 1.8em; }
+			.s4 { bottom: 15%; right: 18%; animation-delay: 3s; }
+			.s5 { top: 50%; left: 5%; animation-delay: 4s; font-size: 1em; color: #ff90c0; }
+			.s6 { top: 65%; right: 7%; animation-delay: 5s; color: #7ab5ff; }
+
+			/* —— 动画 —— */
+			@keyframes float {
+				0%, 100% { transform: translateY(0); }
+				50% { transform: translateY(-12px); }
+			}
+			@keyframes drift {
+				0%, 100% {
+					transform: translate(0, 0) rotate(0deg);
+					opacity: 0.3;
+				}
+				50% {
+					transform: translate(20px, -30px) rotate(180deg);
+					opacity: 0.8;
+				}
+			}
+
+			/* prefers-reduced-motion */
+			@media (prefers-reduced-motion: reduce) {
+				.digit,
+				.s {
+					animation: none !important;
+				}
+			}
+		</style>
+	</body>
+</html>

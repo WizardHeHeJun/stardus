@@ -1,0 +1,284 @@
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   WizardHeHeJun's Notes · giscus 玻璃水色主题
+   基于 giscus 官方 light 主题，把所有面板背景改透明，
+   让博客的水色玻璃卡片直接透出来。
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@import url("https://giscus.app/themes/light.css");
+
+/* —— 1. 全局变量微调（沿用 light 主色，只换面板/边框） —— */
+main {
+	--color-canvas-default: transparent;
+	--color-canvas-overlay: rgba(255, 255, 255, 0.55);
+	--color-canvas-inset: rgba(255, 255, 255, 0.25);
+	--color-canvas-subtle: rgba(255, 255, 255, 0.35);
+
+	--color-border-default: rgba(255, 255, 255, 0.55);
+	--color-border-muted: rgba(0, 0, 0, 0.06);
+
+	--color-accent-fg: #2337ff;
+	--color-accent-emphasis: #ff5d8f;
+	--color-accent-muted: rgba(255, 93, 143, 0.4);
+	--color-accent-subtle: rgba(255, 93, 143, 0.12);
+
+	--color-btn-text: #1f2937;
+	--color-btn-bg: rgba(255, 255, 255, 0.5);
+	--color-btn-border: rgba(255, 255, 255, 0.55);
+	--color-btn-hover-bg: rgba(255, 255, 255, 0.8);
+
+	--color-btn-primary-text: #ffffff;
+	--color-btn-primary-bg: #ff5d8f;
+	--color-btn-primary-border: rgba(255, 93, 143, 0.4);
+	--color-btn-primary-hover-bg: #ff7eb3;
+	--color-btn-primary-shadow: 0 2px 8px rgba(255, 93, 143, 0.3);
+
+	background: transparent !important;
+}
+
+/* —— 2. 强力清扫：giscus 内部用 Primer / Tailwind 的工具类硬指定背景色，
+       这些不走 CSS 变量，需要直接覆盖。
+       策略：所有 Primer 背景类全部透明，再针对功能元素重加玻璃质感 —— */
+.color-bg-default,
+.color-bg-overlay,
+.color-bg-inset,
+.color-bg-subtle,
+.color-bg-muted,
+.color-bg-canvas,
+.color-bg-canvas-default,
+.color-bg-canvas-inset,
+.color-bg-canvas-subtle,
+.color-bg-primary,
+.color-bg-secondary,
+.color-bg-tertiary,
+.color-bg-info,
+.color-bg-info-emphasis,
+.bg-white,
+.bg-gray-50,
+.bg-gray-100,
+.bg-gray-200,
+.dark\:bg-black,
+[class*="bg-canvas"],
+[class*="color-bg-"] {
+	background-color: transparent !important;
+}
+
+/* —— 3. giscus 顶层面板与时间线全部透明 —— */
+.gsc-main,
+.gsc-timeline,
+.gsc-header,
+.gsc-comments,
+.gsc-reactions,
+.gsc-comment-box,
+.gsc-comment,
+.gsc-replies,
+.gsc-reply,
+.gsc-pagination,
+.gsc-loading,
+.gsc-tabs,
+.gsc-comment-box-tabs,
+.gsc-comment-box-tab,
+.gsc-comment-box-bottom,
+.gsc-comment-content,
+.gsc-comment-header,
+.gsc-comment-author,
+.gsc-comment-author-avatar,
+.gsc-comment-footer {
+	background: transparent !important;
+	background-color: transparent !important;
+}
+
+/* —— 4. 「最早 / 最新」排序按钮组
+       giscus 实际用的是 Tailwind 工具类的 button 对，不一定是 [role=tablist]。
+       策略：把所有 .btn / button 默认改透明，只用边框勾轮廓；
+       active/aria-pressed 用粉色文本 + 浅粉色淡填充表达选中态。 —— */
+.gsc-tab-list,
+[role="tablist"] {
+	background: transparent !important;
+	border: 1px solid rgba(255, 255, 255, 0.4) !important;
+	border-radius: 999px !important;
+	overflow: hidden;
+}
+.gsc-tab,
+[role="tab"],
+[aria-pressed] {
+	background: transparent !important;
+	border: none !important;
+	color: rgb(85, 99, 130) !important;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+.gsc-tab:hover,
+[role="tab"]:hover {
+	background: rgba(255, 93, 143, 0.08) !important;
+	color: #ff5d8f !important;
+}
+.gsc-tab[aria-selected="true"],
+[role="tab"][aria-selected="true"],
+[aria-pressed="true"] {
+	background: rgba(255, 93, 143, 0.15) !important;
+	color: #ff5d8f !important;
+	font-weight: 600;
+}
+
+/* —— 5. 评论卡片：极淡填充 + 描边
+   再降一档 alpha，让水色卡背景充分显出来 */
+.gsc-comment {
+	background: rgba(255, 255, 255, 0.08) !important;
+	border: 1px solid rgba(255, 255, 255, 0.4) !important;
+	border-radius: 14px !important;
+	box-shadow: 0 1px 3px rgba(31, 38, 135, 0.04);
+}
+.gsc-comment > .gsc-comment-box {
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+.gsc-comment-header {
+	border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+/* —— 6. textarea：保留比卡片稍高的 alpha，让用户看清输入区域 —— */
+.gsc-comment-box-textarea,
+.gsc-comment-box-write,
+.gsc-comment-box-preview,
+textarea,
+textarea.form-control {
+	background: rgba(255, 255, 255, 0.22) !important;
+	border: 1px solid rgba(255, 255, 255, 0.45) !important;
+	border-radius: 10px !important;
+	color: #1f2937 !important;
+}
+textarea::placeholder {
+	color: rgba(85, 99, 130, 0.65) !important;
+}
+textarea:focus,
+textarea.form-control:focus {
+	background: rgba(255, 255, 255, 0.55) !important;
+	border-color: rgba(255, 93, 143, 0.45) !important;
+	box-shadow: 0 0 0 3px rgba(255, 93, 143, 0.15) !important;
+	outline: none !important;
+}
+
+/* —— 7. 整个评论框外壳（form 容器）：和评论卡一致 —— */
+.gsc-comment-box {
+	background: rgba(255, 255, 255, 0.08) !important;
+	border: 1px solid rgba(255, 255, 255, 0.4) !important;
+	border-radius: 14px !important;
+}
+
+/* —— 7. 反应（reactions） —— */
+.gsc-reactions-count {
+	color: rgb(85, 99, 130);
+	font-weight: 600;
+}
+.gsc-direct-reaction-buttons {
+	background: transparent !important;
+	border: none !important;
+}
+.gsc-direct-reaction-button,
+.gsc-reactions-popover-button {
+	background: transparent !important;
+	border: 1px solid rgba(255, 255, 255, 0.45) !important;
+	color: rgb(85, 99, 130) !important;
+}
+.gsc-direct-reaction-button:hover,
+.gsc-reactions-popover-button:hover {
+	background: rgba(255, 93, 143, 0.08) !important;
+	border-color: rgba(255, 93, 143, 0.35) !important;
+}
+/* 点过的反应（aria-pressed=true / has-reacted）给一个淡粉色提示 */
+.gsc-direct-reaction-button[aria-pressed="true"],
+.gsc-direct-reaction-button.has-reacted {
+	background: rgba(255, 93, 143, 0.15) !important;
+	border-color: rgba(255, 93, 143, 0.4) !important;
+}
+/* emoji 本身的背景也清掉，避免 span 自带任何盒子色 */
+.gsc-direct-reaction-button-emoji,
+.gsc-direct-reaction-button-count {
+	background: transparent !important;
+}
+
+/* —— 8. 主按钮（评论提交 / 登录）→ 粉色渐变 —— */
+.gsc-comment-box-buttons .btn-primary,
+.btn-primary {
+	background: linear-gradient(135deg, #ff7eb3 0%, #ff5d8f 100%) !important;
+	background-color: #ff5d8f !important;
+	border-color: rgba(255, 93, 143, 0.4) !important;
+	color: #ffffff !important;
+	box-shadow: 0 4px 12px rgba(255, 93, 143, 0.3) !important;
+}
+.gsc-comment-box-buttons .btn-primary:hover,
+.btn-primary:hover {
+	background: linear-gradient(135deg, #ff8dbe 0%, #ff6e9c 100%) !important;
+	background-color: #ff7eb3 !important;
+}
+
+/* —— 9. 普通按钮（次级按钮、编辑、回复等）：默认透明只描边 —— */
+.btn:not(.btn-primary) {
+	background: transparent !important;
+	border-color: rgba(255, 255, 255, 0.55) !important;
+	color: #1f2937 !important;
+}
+.btn:not(.btn-primary):hover {
+	background: rgba(255, 93, 143, 0.08) !important;
+	color: #ff5d8f !important;
+	border-color: rgba(255, 93, 143, 0.35) !important;
+}
+
+/* —— 9.1. 「最早 / 最新」 BtnGroup 选中态 ——
+   giscus 实际 DOM:
+     <li aria-current="true|false" class="BtnGroup-item">
+       <button class="btn">最早/最新</button>
+     </li>
+   active 标记在父 <li> 上，不是 button —— 选择器要从父级走 */
+
+/* BtnGroup 容器外观：胶囊化整组 */
+.BtnGroup {
+	background: transparent !important;
+	border: 1px solid rgba(255, 255, 255, 0.45) !important;
+	border-radius: 999px !important;
+	overflow: hidden;
+	display: inline-flex;
+	padding: 2px;
+}
+.BtnGroup-item {
+	background: transparent !important;
+	border: none !important;
+	margin: 0 !important;
+	display: inline-block;
+}
+.BtnGroup-item .btn {
+	background: transparent !important;
+	border: none !important;
+	border-radius: 999px !important;
+	color: rgb(85, 99, 130) !important;
+	padding: 0.3em 0.9em !important;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+.BtnGroup-item .btn:hover {
+	background: rgba(255, 93, 143, 0.08) !important;
+	color: #ff5d8f !important;
+}
+/* 选中态在父 <li> 的 aria-current="true" 上 */
+.BtnGroup-item[aria-current="true"] .btn,
+li[aria-current="true"] > .btn {
+	background: linear-gradient(135deg, #ff7eb3 0%, #ff5d8f 100%) !important;
+	color: #ffffff !important;
+	font-weight: 600;
+	box-shadow: 0 2px 6px rgba(255, 93, 143, 0.25) !important;
+}
+
+/* —— 10. 链接颜色统一站点 accent —— */
+a,
+.gsc-comment a {
+	color: #2337ff !important;
+}
+a:hover {
+	color: #ff5d8f !important;
+}
+
+/* —— 11. 边框统一柔化 —— */
+[class*="border"],
+.gsc-header,
+.gsc-comments {
+	border-color: rgba(0, 0, 0, 0.06) !important;
+}

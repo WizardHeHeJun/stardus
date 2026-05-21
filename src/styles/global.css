@@ -1,0 +1,877 @@
+/*
+  The CSS in this style tag is based off of Bear Blog's default CSS.
+  https://github.com/HermanMartinus/bearblog/blob/297026a877bc2ab2b3bdfbd6b9f7961c350917dd/templates/styles/blog/default.css
+  License MIT: https://github.com/HermanMartinus/bearblog/blob/master/LICENSE.md
+ */
+
+:root {
+	--accent: #2337ff;
+	--accent-dark: #000d8a;
+	--black: 15, 18, 25;
+	--gray: 96, 115, 159;
+	--gray-light: 229, 233, 240;
+	--gray-dark: 34, 41, 57;
+	--gray-gradient: rgba(var(--gray-light), 50%), #fff;
+	--box-shadow:
+		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%),
+		0 16px 32px rgba(var(--gray), 33%);
+	--glass-bg: rgba(255, 255, 255, 0.55);
+	--glass-border: 1px solid rgba(255, 255, 255, 0.45);
+	--glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+	--glass-blur: blur(18px) saturate(180%);
+}
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+/* —— 移除 iOS / Android 默认点击时的蓝色方块高亮 ——
+   保留站点自己的 :active / :hover 反馈即可，避免与玻璃/粉色主题冲突 */
+html {
+	-webkit-tap-highlight-color: transparent;
+	/* —— 自定义滚动条配色（Firefox） —— */
+	scrollbar-color: #94a3b8 transparent;
+	scrollbar-width: thin;
+}
+
+/* —— 自定义滚动条配色（Webkit: Chrome/Safari/Edge） ——
+   thumb 用 slate-400 灰蓝，track 透明、圆角胶囊形 */
+::-webkit-scrollbar {
+	width: 12px;
+	height: 12px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background-color: #94a3b8;
+	border-radius: 999px;
+	/* 用 border + background-clip 让 thumb 视觉上比轨道窄，留两侧呼吸 */
+	border: 3px solid transparent;
+	background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+	background-color: #64748b;
+	background-clip: content-box;
+}
+::-webkit-scrollbar-corner {
+	background: transparent;
+}
+
+/* —— 头像 hover 抖动（avatar-wiggle） ——
+   首页 / 关于 / 博客 sidebar 三处头像复用同一份 keyframes。
+   在各组件里只需写：.avatar:hover { animation: avatar-wiggle 0.6s cubic-bezier(0.36, 0, 0.45, 1.4); } */
+@keyframes avatar-wiggle {
+	0%, 100% { transform: scale(1) rotate(0); }
+	15%      { transform: scale(1.08) rotate(-8deg); }
+	35%      { transform: scale(1.08) rotate(7deg); }
+	55%      { transform: scale(1.08) rotate(-5deg); }
+	75%      { transform: scale(1.08) rotate(3deg); }
+}
+a,
+button,
+input,
+select,
+textarea,
+[role='button'] {
+	-webkit-tap-highlight-color: transparent;
+}
+html,
+body {
+	min-height: 100vh;
+	/* 安全网：禁止整页发生横向滚动（任何元素超宽会被裁掉，不会推宽文档）。
+	   用 clip 而不是 hidden —— clip 不创建滚动容器，不破坏子元素的 sticky/fixed */
+	overflow-x: clip;
+}
+body {
+	font-family: 'LXGW WenKai Screen', 'LXGW WenKai', -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+	margin: 0;
+	padding: 0;
+	text-align: left;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	background-image: linear-gradient(135deg, #ffbcd9 0%, #dab3ff 50%, #afd3ff 100%);
+	background-attachment: fixed;
+	background-color: #dab3ff;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	color: rgb(var(--gray-dark));
+	/* 流式字号：≤640px 起步 16px，1280px+ 封顶 20px */
+	font-size: clamp(16px, 0.6vw + 14px, 20px);
+	line-height: 1.7;
+}
+/*
+  ━━━━━━━━━━ 响应式断点（参考） ━━━━━━━━━━
+  ≤ 640px   手机
+  641–960   平板
+  961–1280  桌面（默认设计宽度）
+  > 1280    大屏（部分页面解锁更宽布局）
+*/
+main {
+	width: min(720px, 100% - 2em);
+	margin: 2em auto;
+	padding: 2.5em 2em;
+	background: var(--glass-bg);
+	backdrop-filter: var(--glass-blur);
+	-webkit-backdrop-filter: var(--glass-blur);
+	border: var(--glass-border);
+	border-radius: 18px;
+	box-shadow: var(--glass-shadow);
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	margin: 0 0 0.5rem 0;
+	color: rgb(var(--black));
+	line-height: 1.2;
+}
+h1 {
+	/* 响应式：移动 ~1.4em（22px @ 16px base） → 桌面 2.4em（48px @ 20px base）
+	   中文标题专用：避免桌面端压顶 + 窄屏不挤行 */
+	font-size: clamp(1.4em, 0.9em + 2.1vw, 2.4em);
+}
+h2 {
+	font-size: clamp(1.2em, 0.8em + 1.2vw, 1.65em);
+}
+h3 {
+	font-size: clamp(1.08em, 0.78em + 0.85vw, 1.35em);
+}
+h4 {
+	font-size: 1.3em;
+}
+h5 {
+	font-size: 1.15em;
+}
+strong,
+b {
+	font-weight: 700;
+}
+a {
+	color: var(--accent);
+}
+a:hover {
+	color: var(--accent);
+}
+p {
+	margin-bottom: 1em;
+}
+.prose p {
+	margin-bottom: 2em;
+}
+textarea {
+	width: 100%;
+	font-size: 16px;
+}
+input {
+	font-size: 16px;
+}
+table {
+	width: 100%;
+}
+/* .prose 表格基础样式：玻璃风兼容的轻量边框 + 表头强调
+   原因：默认 markdown 表格无任何 border/padding，渲染出来就是几列纯文本，
+   读者看不出「这是表格」。给一组克制的视觉语言：表头粉色底 + 双线分隔 + 行边线。 */
+.prose table {
+	border-collapse: collapse;
+	margin: 1.2em 0;
+	font-size: 0.95em;
+}
+.prose table th,
+.prose table td {
+	padding: 0.6em 0.9em;
+	text-align: left;
+	vertical-align: top;
+	line-height: 1.6;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+	/* 列与列之间的极淡竖分隔——形成轻量网格感，扫读时更容易跟住列 */
+	border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+.prose table th:last-child,
+.prose table td:last-child {
+	border-right: none;
+}
+.prose table th {
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	color: rgb(var(--black));
+	/* 中性深一点的玻璃底——比行有明显对比，但不靠彩色 */
+	background: rgba(0, 0, 0, 0.05);
+	border-bottom: 2px solid rgba(0, 0, 0, 0.22);
+}
+/* 首列做「行标签」差异化：微底色 + 加粗，让读者第一眼能区分「这一行讲的什么」 */
+.prose table tbody td:first-child {
+	font-weight: 600;
+	color: rgb(var(--black));
+	background: rgba(0, 0, 0, 0.025);
+}
+.prose table tbody tr:last-child td {
+	border-bottom: none;
+}
+.prose table tbody tr {
+	transition: background 0.18s ease;
+}
+.prose table tbody tr:hover {
+	background: rgba(255, 255, 255, 0.3);
+}
+/* ≤640 窄屏：表格降级为横向滚动容器
+   原因：CSS auto-layout 在 viewport 不够时只会均分列宽，长 inline code（如路径）
+   会霸占大部分宽度，把「知识库」这种 3-4 字标题挤成单字符竖排。
+   修法：display: block + overflow-x: auto，宁可让表格溢出后滚，也不要被压成竖排。
+   每个 cell 给 5em min-width 兜底——短标题至少能成一行。
+   滚动提示：mask-image 边缘渐隐——iOS Safari 默认隐藏滚动条，没视觉提示用户不知道能滑；
+   配 BlogPost.astro 的 JS 给 table 加 .is-scrollable / .at-start / .at-end 状态类。 */
+@media (max-width: 640px) {
+	.prose table {
+		display: block;
+		max-width: 100%;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+	.prose table th,
+	.prose table td {
+		min-width: 5em;
+	}
+	/* 能滚 + 停在最左：右边渐隐（提示右边有内容） */
+	.prose table.is-scrollable.at-start {
+		-webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+		mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+	}
+	/* 能滚 + 中间位置：两边都渐隐 */
+	.prose table.is-scrollable:not(.at-start):not(.at-end) {
+		-webkit-mask-image: linear-gradient(
+			to right,
+			transparent 0%,
+			black 28px,
+			black calc(100% - 28px),
+			transparent 100%
+		);
+		mask-image: linear-gradient(
+			to right,
+			transparent 0%,
+			black 28px,
+			black calc(100% - 28px),
+			transparent 100%
+		);
+	}
+	/* 能滚 + 滚到底：左边渐隐 */
+	.prose table.is-scrollable.at-end {
+		-webkit-mask-image: linear-gradient(to right, transparent 0%, black 28px, black 100%);
+		mask-image: linear-gradient(to right, transparent 0%, black 28px, black 100%);
+	}
+}
+img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 8px;
+}
+code {
+	padding: 2px 5px;
+	background-color: rgb(var(--gray-light));
+	border-radius: 2px;
+}
+pre {
+	padding: 1.5em;
+	border-radius: 8px;
+}
+pre > code {
+	all: unset;
+}
+
+/* ============================================================
+   shiki 代码块 macOS 窗口风：顶部灰条 + 3 圆点 + lang 标签
+   ============================================================
+   astro shiki 输出 <pre class="astro-code" data-language="xxx">；
+   inline style 自带 background-color，我们用 inset box-shadow 画 36px header 条覆盖在它上方
+*/
+pre.astro-code {
+	position: relative;
+	margin: 1.4em 0;
+	padding: 2.6em 1.4em 1.2em !important;
+	border-radius: 10px;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	/* 关键：pre 自己 NOT overflow——否则横向滚动时 ::before/::after/.code-actions
+	   这些 absolute 装饰会跟着内容一起漂走（CSS 规范：absolute 锚在 scroll 内容的
+	   padding box，不是可视窗口）。把滚动下放给内层 code，pre 做不动的外壳。 */
+	overflow: hidden;
+	box-shadow:
+		inset 0 36px 0 #ecedef,
+		inset 0 36px 0 0.5px rgba(0, 0, 0, 0.06),
+		0 4px 16px rgba(31, 38, 135, 0.08);
+}
+pre.astro-code > code {
+	display: block;
+	overflow-x: auto;
+	/* 让滚动条紧贴底边而不是悬在内容中间 */
+	padding-bottom: 2px;
+}
+pre.astro-code::before {
+	content: '';
+	position: absolute;
+	top: 12px;
+	left: 14px;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: #ff5f56;
+	box-shadow:
+		20px 0 #ffbd2e,
+		40px 0 #27c93f;
+}
+pre.astro-code::after {
+	content: attr(data-language);
+	position: absolute;
+	top: 0;
+	left: 76px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	font-size: 0.88em;
+	font-weight: 500;
+	color: #4a5568;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-family: 'LXGW WenKai Screen', sans-serif;
+}
+pre.astro-code[data-language="plaintext"]::after,
+pre.astro-code[data-language="text"]::after {
+	display: none;
+}
+
+/* —— 代码块右上角动作按钮：放大 + 复制（JS 在 BlogPost.astro 末尾注入） —— */
+pre.astro-code .code-actions {
+	position: absolute;
+	top: 6px;
+	right: 8px;
+	display: flex;
+	gap: 6px;
+	z-index: 2;
+}
+pre.astro-code .code-action-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: 5px;
+	color: #4a5568;
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease,
+		transform 0.15s ease;
+}
+pre.astro-code .code-action-btn:hover {
+	background: rgba(35, 55, 255, 0.1);
+	color: #2337ff;
+	transform: translateY(-1px);
+}
+pre.astro-code .code-action-btn.is-copied {
+	background: rgba(16, 185, 129, 0.15);
+	color: #10b981;
+}
+pre.astro-code .code-action-btn svg {
+	display: block;
+}
+
+/* —— 放大态：占满 viewport 中央，超大圆角，覆盖一切 ——
+   box-shadow spread 100vmax 模拟全屏暗遮罩 + 大模糊阴影；
+   这样不需要 body::before 单独画一层（避免跟 .prose 的 backdrop-filter
+   创建的 stacking context 打架，导致 fullscreen pre 跳不到最上层）*/
+pre.astro-code.is-fullscreen {
+	position: fixed !important;
+	inset: 5vh 5vw;
+	margin: 0 !important;
+	width: auto !important;
+	max-width: none;
+	height: auto;
+	max-height: 90vh;
+	overflow: auto;
+	z-index: 1000;
+	border-radius: 14px;
+	box-shadow:
+		0 0 0 100vmax rgba(0, 0, 0, 0.55),
+		0 24px 64px rgba(0, 0, 0, 0.35);
+}
+body.code-fullscreen-open {
+	overflow: hidden;
+}
+
+@media (max-width: 640px) {
+	pre.astro-code {
+		padding: 2.4em 1em 1em !important;
+	}
+	pre.astro-code::after {
+		display: none;
+	}
+	pre.astro-code.is-fullscreen {
+		inset: 2vh 2vw;
+		max-height: 96vh;
+	}
+}
+blockquote {
+	border-left: 4px solid var(--accent);
+	padding: 0 0 0 20px;
+	margin: 0;
+	font-size: 1.333em;
+}
+hr {
+	border: none;
+	border-top: 1px solid rgb(var(--gray-light));
+}
+@media (max-width: 960px) {
+	main {
+		padding: 1.8em 1.4em;
+	}
+}
+@media (max-width: 640px) {
+	main {
+		width: min(720px, 100% - 0.8em);
+		padding: 1.4em 1em;
+	}
+}
+
+/* ============================================================
+   Shoka 风格 markdown directives
+   ============================================================
+   :::info / :::tip / :::warning / :::danger / :::spoiler / :::fold[标题]
+   渲染规则见 plugins/remark-shoka-directives.mjs
+*/
+.prose .callout {
+	margin: 1.2em 0;
+	padding: 0.9em 1.1em 0.9em 1em;
+	border-left: 4px solid var(--callout-color, var(--accent));
+	border-radius: 8px;
+	background: var(--callout-bg, rgba(35, 55, 255, 0.06));
+	position: relative;
+	overflow-wrap: anywhere;
+}
+.prose .callout code {
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+.prose .callout::before {
+	content: var(--callout-icon, '');
+	display: block;
+	margin-bottom: 0.4em;
+	font-weight: 700;
+	color: var(--callout-color, var(--accent));
+}
+.prose .callout > :first-child {
+	margin-top: 0;
+}
+.prose .callout > :last-child {
+	margin-bottom: 0;
+}
+.prose .callout-info {
+	--callout-color: #3b82f6;
+	--callout-bg: rgba(59, 130, 246, 0.08);
+	--callout-icon: 'ℹ 提示';
+}
+.prose .callout-tip {
+	--callout-color: #10b981;
+	--callout-bg: rgba(16, 185, 129, 0.08);
+	--callout-icon: '✓ 小诀窍';
+}
+.prose .callout-warning {
+	--callout-color: #f59e0b;
+	--callout-bg: rgba(245, 158, 11, 0.1);
+	--callout-icon: '⚠ 注意';
+}
+.prose .callout-danger {
+	--callout-color: #ef4444;
+	--callout-bg: rgba(239, 68, 68, 0.08);
+	--callout-icon: '✗ 危险';
+}
+
+/* —— 折叠块 ::: fold[标题] —— */
+.prose details.fold {
+	margin: 1.2em 0;
+	padding: 0.5em 0.9em;
+	border: 1px solid rgba(35, 55, 255, 0.18);
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.4);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+}
+.prose details.fold > summary {
+	cursor: pointer;
+	list-style: none;
+	font-weight: 600;
+	color: var(--accent);
+	display: flex;
+	align-items: center;
+	gap: 0.4em;
+	user-select: none;
+	padding: 0.2em 0;
+}
+.prose details.fold > summary::-webkit-details-marker {
+	display: none;
+}
+.prose details.fold > summary::before {
+	content: '▸';
+	display: inline-block;
+	font-size: 0.85em;
+	transition: transform 0.2s ease;
+	color: var(--accent);
+}
+.prose details.fold[open] > summary::before {
+	transform: rotate(90deg);
+}
+.prose details.fold > summary + * {
+	margin-top: 0.6em;
+}
+.prose details.fold[open] > :last-child {
+	margin-bottom: 0.4em;
+}
+
+/* —— 剧透块 :::spoiler —— */
+.prose .spoiler {
+	display: inline-block;
+	padding: 0.1em 0.4em;
+	background: rgb(var(--gray));
+	color: transparent;
+	border-radius: 4px;
+	cursor: pointer;
+	user-select: none;
+	transition:
+		color 0.2s ease,
+		background 0.2s ease;
+	outline: none;
+}
+.prose .spoiler:hover,
+.prose .spoiler:focus-visible,
+.prose .spoiler.revealed {
+	color: inherit;
+	background: rgba(var(--gray), 0.18);
+	user-select: text;
+}
+.prose .spoiler > :first-child {
+	margin-top: 0;
+}
+.prose .spoiler > :last-child {
+	margin-bottom: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+	.prose .spoiler,
+	.prose details.fold > summary::before {
+		transition: none;
+	}
+}
+
+/* ============================================================
+   正文 figure 图片（alt 自动转 figcaption，见 plugins/remark-figure.mjs）
+   ============================================================ */
+.prose .prose-figure {
+	margin: 1.6em auto;
+	text-align: center;
+}
+.prose .prose-figure img {
+	display: block;
+	margin: 0 auto;
+	max-width: 100%;
+	height: auto;
+	border-radius: 10px;
+	box-shadow: 0 6px 22px rgba(31, 38, 135, 0.16);
+	cursor: zoom-in;
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.2s ease;
+}
+.prose .prose-figure img:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 32px rgba(31, 38, 135, 0.22);
+}
+.prose .prose-figure figcaption {
+	margin-top: 0.6em;
+	font-size: 0.82em;
+	color: rgb(var(--gray));
+	font-style: italic;
+	letter-spacing: 0.02em;
+}
+
+/* —— Lightbox 容器：JS portal 三件（backdrop / figure / toolbar）到 body ——
+   .prose 有 backdrop-filter 会让 fixed 子塌成 absolute，所以必须 portal */
+.lightbox-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.72);
+	z-index: 999;
+	cursor: zoom-out;
+}
+.prose-figure-fullscreen {
+	position: fixed !important;
+	inset: 5vh 5vw;
+	margin: 0 !important;
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.8em;
+	pointer-events: none; /* 周围空白让 backdrop click 透过 */
+}
+.prose-figure-fullscreen img {
+	pointer-events: auto;
+	max-width: 100%;
+	max-height: 80vh;
+	width: auto;
+	height: auto;
+	border-radius: 14px;
+	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+	cursor: zoom-in;
+	transform-origin: center center;
+	transition: transform 0.18s ease;
+	user-select: none;
+	-webkit-user-drag: none;
+}
+.prose-figure-fullscreen img.is-zoomed {
+	cursor: grab;
+}
+.prose-figure-fullscreen img.is-dragging {
+	cursor: grabbing;
+	transition: none;
+}
+.prose-figure-fullscreen figcaption {
+	pointer-events: auto;
+	color: rgba(255, 255, 255, 0.85);
+	font-size: 0.95em;
+	font-style: italic;
+	letter-spacing: 0.04em;
+	max-width: 80vw;
+	text-align: center;
+}
+
+/* —— 右侧工具栏（仿 macOS 预览）—— */
+.lightbox-toolbar {
+	position: fixed;
+	top: 50%;
+	right: 16px;
+	transform: translateY(-50%);
+	z-index: 1001;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	padding: 12px 8px;
+	background: rgba(255, 255, 255, 0.08);
+	backdrop-filter: blur(12px) saturate(180%);
+	-webkit-backdrop-filter: blur(12px) saturate(180%);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 14px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+.lightbox-toolbar button {
+	width: 42px;
+	height: 42px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: none;
+	border-radius: 9px;
+	color: rgba(255, 255, 255, 0.9);
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
+}
+.lightbox-toolbar button:hover {
+	background: rgba(255, 255, 255, 0.18);
+	color: #fff;
+}
+.lightbox-zoom-level {
+	font-size: 0.7em;
+	color: rgba(255, 255, 255, 0.75);
+	font-weight: 500;
+	letter-spacing: 0.04em;
+	font-variant-numeric: tabular-nums;
+	min-width: 36px;
+	text-align: center;
+	margin: 2px 0;
+}
+
+body.figure-lightbox-open {
+	overflow: hidden;
+}
+
+/* ============================================================
+   Mermaid 图表（客户端 lazy load 渲染，见 BlogPost.astro 末尾脚本）
+   ============================================================ */
+.prose .mermaid-figure {
+	margin: 1.8em auto;
+	padding: 1.4em 1.6em;
+	background: var(--glass-bg);
+	backdrop-filter: var(--glass-blur);
+	-webkit-backdrop-filter: var(--glass-blur);
+	border: var(--glass-border);
+	border-radius: 18px;
+	box-shadow: var(--glass-shadow);
+	overflow: hidden;
+}
+.prose .mermaid-figure .mermaid {
+	background: transparent;
+	text-align: center;
+	margin: 0;
+	font-family: 'LXGW WenKai Screen', 'PingFang SC', sans-serif;
+	color: rgb(var(--gray-dark));
+}
+/* mermaid.js 渲染后 SVG 自适应宽度 */
+.prose .mermaid-figure svg {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin: 0 auto;
+}
+@media (max-width: 640px) {
+	.prose .mermaid-figure {
+		padding: 1em;
+		border-radius: 14px;
+		margin: 1.4em -0.4em;
+	}
+}
+
+/* ============================================================
+   OG 链接卡（裸 URL 段落转，见 plugins/remark-link-card.mjs）
+   左：标题 + 描述 + favicon + host  /  右：缩略图
+   ============================================================ */
+.prose .link-card {
+	display: flex;
+	gap: 0;
+	margin: 1.4em 0;
+	min-height: 110px;
+	background: rgba(255, 255, 255, 0.55);
+	backdrop-filter: blur(12px) saturate(180%);
+	-webkit-backdrop-filter: blur(12px) saturate(180%);
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	border-radius: 14px;
+	box-shadow: 0 4px 16px rgba(31, 38, 135, 0.08);
+	text-decoration: none;
+	color: rgb(var(--gray-dark));
+	overflow: hidden;
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.25s ease,
+		background 0.2s ease;
+}
+.prose .link-card:hover {
+	transform: translateY(-2px);
+	background: rgba(255, 255, 255, 0.75);
+	box-shadow: 0 14px 36px rgba(31, 38, 135, 0.18);
+}
+.prose .link-card-body {
+	flex: 1 1 auto;
+	min-width: 0; /* 让内部 text-overflow 生效 */
+	display: flex;
+	flex-direction: column;
+	gap: 0.35em;
+	padding: 0.95em 1.1em;
+	justify-content: space-between;
+}
+.prose .link-card-title {
+	font-size: 0.98em;
+	font-weight: 600;
+	color: #000;
+	line-height: 1.35;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+.prose .link-card-desc {
+	font-size: 0.82em;
+	color: rgb(var(--gray));
+	line-height: 1.45;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+.prose .link-card-meta {
+	display: flex;
+	align-items: center;
+	gap: 0.4em;
+	font-size: 0.75em;
+	color: rgb(var(--gray));
+	letter-spacing: 0.02em;
+}
+.prose .link-card-favicon {
+	width: 14px;
+	height: 14px;
+	border-radius: 3px;
+	object-fit: contain;
+	flex-shrink: 0;
+	background: #fff;
+}
+.prose .link-card-host {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.prose .link-card-image {
+	flex: 0 0 200px;
+	background: rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+}
+.prose .link-card-image img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.4s ease;
+}
+.prose .link-card:hover .link-card-image img {
+	transform: scale(1.04);
+}
+.prose .link-card-fallback {
+	min-height: 0;
+}
+.prose .link-card-fallback .link-card-title {
+	font-size: 0.88em;
+	font-weight: 500;
+	color: var(--accent);
+	-webkit-line-clamp: 1;
+	word-break: break-all;
+}
+
+@media (max-width: 640px) {
+	.prose .link-card {
+		flex-direction: column-reverse;
+		min-height: 0;
+	}
+	.prose .link-card-image {
+		flex: 0 0 140px;
+		width: 100%;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.prose .link-card,
+	.prose .link-card-image img {
+		transition: background 0.2s ease;
+		transform: none !important;
+	}
+}
+
+.sr-only {
+	border: 0;
+	padding: 0;
+	margin: 0;
+	position: absolute !important;
+	height: 1px;
+	width: 1px;
+	overflow: hidden;
+	/* IE6, IE7 - a 0 height clip, off to the bottom right of the visible 1px box */
+	clip: rect(1px 1px 1px 1px);
+	/* maybe deprecated but we need to support legacy browsers */
+	clip: rect(1px, 1px, 1px, 1px);
+	/* modern browsers, clip-path works inwards from each corner */
+	clip-path: inset(50%);
+	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
+	white-space: nowrap;
+}

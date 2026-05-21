@@ -1,0 +1,419 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import elysia from '../assets/elysia.png';
+import BaseHead from '../components/BaseHead.astro';
+import Comments from '../components/Comments.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const posts = await getCollection('blog');
+const categoryCount = new Set(posts.map((p) => p.data.category)).size;
+const tagCount = new Set(posts.flatMap((p) => p.data.tags)).size;
+
+// 工具箱分类——把 items 换成你日常真正用的东西
+const stack = [
+	{ name: '语言', items: ['示例 1', '示例 2', '示例 3'] },
+	{ name: '框架', items: ['示例 1', '示例 2', '示例 3'] },
+	{ name: '工具', items: ['示例 1', '示例 2', '示例 3'] },
+	{ name: '兴趣', items: ['示例 1', '示例 2', '示例 3'] },
+	{ name: '这个站', items: ['Astro', 'GitHub Pages', 'GitHub Actions'] },
+];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`关于 · ${SITE_TITLE}`} description={`${SITE_TITLE} 的自我介绍`} />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<!-- ━━━━━━━━━━ Hero ━━━━━━━━━━ -->
+			<section class="hero">
+				<Image src={elysia} width={140} height={140} alt="头像" class="avatar" />
+				<h1 class="name">你的名字</h1>
+				<p class="romaji">your-handle</p>
+
+				<div class="pills">
+					<span class="pill">🖋 写作</span>
+					<span class="pill">💻 开发</span>
+					<span class="pill">📚 阅读</span>
+					<span class="pill">☕ 咖啡</span>
+				</div>
+
+				<div class="socials">
+					<!-- 把下面的 href="#" 替换成你自己的链接 -->
+					<a href="#" target="_blank" rel="noopener" aria-label="GitHub">
+						<svg viewBox="0 0 16 16" aria-hidden="true" width="22" height="22"
+							><path
+								fill="currentColor"
+								d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+							></path></svg
+						>
+					</a>
+					<a href="#" target="_blank" rel="noopener" aria-label="Twitter">
+						<svg viewBox="0 0 16 16" aria-hidden="true" width="22" height="22"
+							><path
+								fill="currentColor"
+								d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"
+							></path></svg
+						>
+					</a>
+					<a href="#" aria-label="邮件">
+						<svg viewBox="0 0 24 24" aria-hidden="true" width="22" height="22"
+							><path
+								fill="currentColor"
+								d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4.236-8 4.882-8-4.882V6l8 4.882L20 6v2.236z"
+							></path></svg
+						>
+					</a>
+				</div>
+
+				<div class="stats">
+					<div><b>{posts.length}</b><span>文章</span></div>
+					<div><b>{categoryCount}</b><span>分类</span></div>
+					<div><b>{tagCount}</b><span>标签</span></div>
+				</div>
+			</section>
+
+			<!-- ━━━━━━━━━━ 自我介绍 ━━━━━━━━━━ -->
+			<section class="card">
+				<h2>👋 你好</h2>
+				<p>
+					我是 <strong>你的名字</strong>。我会在这里写关于 <em>主题 A</em>、<em>主题 B</em>，
+					以及任何我觉得有意思的东西。
+				</p>
+				<p>
+					这个博客是我放笔记、半成品想法、以及偶尔可运行的小项目的地方。
+				</p>
+				<p>
+					如果你恰好读到对你有用的内容——那就是写这些字最大的回报。
+				</p>
+			</section>
+
+			<!-- ━━━━━━━━━━ 工具箱 ━━━━━━━━━━ -->
+			<section class="card">
+				<h2>🛠️ 工具箱</h2>
+				<p class="muted">日常真正用的，不是「面试我会用」那种列表。</p>
+				<div class="stack">
+					{
+						stack.map((g) => (
+							<div class="stack-row">
+								<div class="stack-label">{g.name}</div>
+								<div class="stack-chips">
+									{g.items.map((it) => (
+										<span class="chip">{it}</span>
+									))}
+								</div>
+							</div>
+						))
+					}
+				</div>
+			</section>
+
+			<!-- ━━━━━━━━━━ 日常碎碎念 ━━━━━━━━━━ -->
+			<section class="card">
+				<h2>🎮 日常碎碎念</h2>
+				<ul class="facts">
+					<li>💼 工作里我在做什么——换成你自己的描述</li>
+					<li>🎨 一个业余项目或爱好——换成你自己的描述</li>
+					<li>📚 最近在读的书——换成你自己的描述</li>
+					<li>🎵 写代码常听的音乐——换成你自己的描述</li>
+					<li>☕ 偏好的饮品——换成你自己的描述</li>
+					<li>🌱 在尝试保持的习惯——换成你自己的描述</li>
+				</ul>
+			</section>
+
+			<!-- ━━━━━━━━━━ 关于这个站 ━━━━━━━━━━ -->
+			<section class="card">
+				<h2>🏠 关于这个站</h2>
+				<ul class="meta-list">
+					<li>
+						<b>构建</b>：<code>Astro 6</code> + <code>GitHub Pages</code> +
+						<code>GitHub Actions</code> 自动部署
+					</li>
+					<li>
+						<b>主题</b>：手搓的 glassmorphism + 柔和渐变（<code>backdrop-filter</code> + 渐变背景）
+					</li>
+					<li>
+						<b>字体</b>：霞鹜文楷（LXGW WenKai Screen），通过 jsDelivr CDN 按字符 chunk 加载
+					</li>
+					<li><b>搜索</b>：Pagefind 静态全文索引——零运维</li>
+					<li><b>音乐</b>：APlayer + MetingJS（可选，可在 Footer.astro 移除）</li>
+					<li>
+						<b>开源</b>：完整代码在
+						<a href="#" target="_blank">GitHub</a>——欢迎 fork
+					</li>
+				</ul>
+			</section>
+
+			<!-- ━━━━━━━━━━ 评论 ━━━━━━━━━━ -->
+			<Comments
+				mapping="specific"
+				term="page-about"
+				title="💬 来打个招呼"
+				hint="用 GitHub 账号登录，留个表情或写两句都好。"
+			/>
+		</main>
+		<Footer />
+
+		<style>
+			main {
+				width: min(800px, 100% - 2em);
+				background: transparent;
+				backdrop-filter: none;
+				-webkit-backdrop-filter: none;
+				border: none;
+				border-radius: 0;
+				box-shadow: none;
+				padding: 1em;
+				display: flex;
+				flex-direction: column;
+				gap: 1.2em;
+			}
+
+			/* —— Hero —— */
+			.hero {
+				text-align: center;
+				padding: 2.2em 1.6em;
+				background: rgba(255, 255, 255, 0.55);
+				backdrop-filter: blur(18px) saturate(180%);
+				-webkit-backdrop-filter: blur(18px) saturate(180%);
+				border: 1px solid rgba(255, 255, 255, 0.45);
+				border-radius: 18px;
+				box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+			}
+			.avatar {
+				display: block;
+				margin: 0 auto 0.6em;
+				width: 110px;
+				height: 110px;
+				border-radius: 50%;
+				object-fit: cover;
+				border: 4px solid rgba(255, 255, 255, 0.7);
+				box-shadow:
+					0 0 0 4px rgba(194, 128, 255, 0.2),
+					0 8px 24px rgba(31, 38, 135, 0.18);
+				cursor: pointer;
+				will-change: transform;
+			}
+			.avatar:hover {
+				animation: avatar-wiggle 0.6s cubic-bezier(0.36, 0, 0.45, 1.4);
+			}
+			@media (prefers-reduced-motion: reduce) {
+				.avatar:hover {
+					animation: none;
+				}
+			}
+			.name {
+				font-size: clamp(1.6em, 3vw + 1em, 2.4em);
+				margin: 0.2em 0 0;
+				font-weight: 800;
+				color: rgb(var(--gray-dark));
+			}
+			.romaji {
+				margin: 0.1em 0 1em;
+				color: rgb(var(--gray));
+				letter-spacing: 0.08em;
+				font-size: 0.95em;
+			}
+			.pills {
+				display: flex;
+				justify-content: center;
+				flex-wrap: wrap;
+				gap: 0.5em;
+				margin-bottom: 1em;
+			}
+			.pill {
+				display: inline-block;
+				padding: 0.3em 0.9em;
+				background: rgba(255, 255, 255, 0.7);
+				border: 1px solid rgba(255, 255, 255, 0.8);
+				border-radius: 999px;
+				font-size: 0.85em;
+				color: rgb(var(--gray-dark));
+			}
+			.socials {
+				display: flex;
+				justify-content: center;
+				gap: 0.6em;
+				margin-bottom: 1.2em;
+				flex-wrap: wrap;
+			}
+			.socials a {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: 40px;
+				height: 40px;
+				background: rgba(0, 0, 0, 0.04);
+				color: rgb(var(--gray));
+				text-decoration: none;
+				border-radius: 50%;
+				transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+			}
+			.socials a:hover {
+				background: rgba(35, 55, 255, 0.1);
+				color: var(--accent);
+				transform: translateY(-2px);
+			}
+			.socials svg {
+				display: block;
+				width: 22px;
+				height: 22px;
+			}
+			.stats {
+				display: flex;
+				justify-content: center;
+				gap: 2em;
+				padding-top: 1em;
+				border-top: 1px dashed rgba(0, 0, 0, 0.08);
+			}
+			.stats div {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
+			.stats b {
+				font-size: 1.6em;
+				font-weight: 700;
+				color: var(--accent);
+				line-height: 1;
+			}
+			.stats span {
+				font-size: 0.78em;
+				color: rgb(var(--gray));
+				margin-top: 0.3em;
+			}
+
+			/* —— 通用 card —— */
+			.card {
+				padding: 1.6em 1.8em;
+				background: rgba(255, 255, 255, 0.5);
+				backdrop-filter: blur(16px) saturate(170%);
+				-webkit-backdrop-filter: blur(16px) saturate(170%);
+				border: 1px solid rgba(255, 255, 255, 0.45);
+				border-radius: 18px;
+				box-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
+			}
+			.card h2 {
+				margin: 0 0 0.6em;
+				font-size: 1.4em;
+			}
+			.card p {
+				margin: 0.5em 0;
+				line-height: 1.7;
+			}
+			.muted {
+				color: rgb(var(--gray));
+				font-size: 0.9em;
+			}
+
+			/* —— 工具箱 —— */
+			.stack {
+				display: flex;
+				flex-direction: column;
+				gap: 0.6em;
+				margin-top: 0.5em;
+			}
+			.stack-row {
+				display: flex;
+				gap: 0.8em;
+				align-items: flex-start;
+			}
+			.stack-label {
+				min-width: 6em;
+				padding-top: 0.25em;
+				color: rgb(var(--gray));
+				font-size: 0.9em;
+				flex-shrink: 0;
+			}
+			.stack-chips {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.4em;
+			}
+			.chip {
+				display: inline-block;
+				padding: 0.2em 0.7em;
+				background: rgba(35, 55, 255, 0.07);
+				border: 1px solid rgba(35, 55, 255, 0.15);
+				border-radius: 6px;
+				font-size: 0.85em;
+				color: var(--accent);
+			}
+
+			/* —— 日常 —— */
+			.facts {
+				margin: 0.5em 0;
+				padding: 0;
+				list-style: none;
+				display: flex;
+				flex-direction: column;
+				gap: 0.5em;
+			}
+			.facts li {
+				padding: 0.3em 0;
+				color: rgb(var(--gray-dark));
+				line-height: 1.6;
+			}
+
+			/* —— 站点元信息 —— */
+			.meta-list {
+				margin: 0.5em 0;
+				padding-left: 1.3em;
+				color: rgb(var(--gray-dark));
+				line-height: 1.9;
+			}
+			.meta-list code {
+				padding: 0.05em 0.4em;
+				background: rgba(0, 0, 0, 0.06);
+				border-radius: 4px;
+				font-size: 0.9em;
+			}
+			.meta-list a {
+				color: var(--accent);
+			}
+
+			@media (max-width: 960px) {
+				.stack-label {
+					min-width: 5em;
+				}
+			}
+			@media (max-width: 640px) {
+				main {
+					width: min(800px, 100% - 0.8em);
+					padding: 0.4em;
+					gap: 1em;
+				}
+				.hero {
+					padding: 1.6em 1em;
+				}
+				.stats {
+					gap: 1.2em;
+				}
+				.stack-row {
+					flex-direction: column;
+					gap: 0.3em;
+				}
+				.stack-label {
+					min-width: auto;
+				}
+			}
+
+			/* —— 大屏：放宽内容范围 —— */
+			@media (min-width: 1400px) {
+				main {
+					width: min(1000px, 100% - 4em);
+				}
+			}
+			@media (min-width: 1800px) {
+				main {
+					width: min(1140px, 100% - 6em);
+				}
+			}
+		</style>
+	</body>
+</html>
