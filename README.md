@@ -2,7 +2,7 @@
 
 > 基于 Astro 6 的博客模板 —— glassmorphism 玻璃风 + 柔和渐变，零后端，推送即发布。
 
-- 🌐 **在线 demo**：[wizardhehejun.github.io](https://wizardhehejun.github.io/)
+- 🌐 **在线 demo**：填上你部署的 GitHub Pages 地址（如 `https://<your-username>.github.io/<repo>/`）
 
 ---
 
@@ -77,7 +77,7 @@
 1. GitHub Actions 触发 `Deploy to GitHub Pages` workflow
 2. Ubuntu runner 跑 `npm install` + `npm run build`（含 Pagefind 索引生成）
 3. `dist/` 上传为 Pages artifact
-4. 自动发布到 `wizardhehejun.github.io`
+4. 自动发布到你的 GitHub Pages 域名（`<your-username>.github.io` 或 `<your-username>.github.io/<repo>`）
 
 约 **40-50 秒**完成，`git push` 即发布。
 
@@ -95,8 +95,8 @@ gh run list --workflow "Deploy to GitHub Pages" --limit 1      # 查最新状态
 ### 本地开发
 
 ```powershell
-git clone https://github.com/WizardHeHeJun/WizardHeHeJun.github.io.git
-cd WizardHeHeJun.github.io
+git clone <your-repo-url>
+cd <your-repo>
 npm install
 npm run dev      # http://localhost:4321/
 ```
@@ -277,8 +277,8 @@ node scripts/crop-hero.mjs      # 竖版人像图预裁为脸居中横版
 
 ```powershell
 # 新机器拉代码
-git clone https://github.com/WizardHeHeJun/WizardHeHeJun.github.io.git
-cd WizardHeHeJun.github.io
+git clone <your-repo-url>
+cd <your-repo>
 npm install
 
 # 写之前先拉
