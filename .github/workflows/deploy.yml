@@ -1,8 +1,14 @@
 name: Deploy to GitHub Pages
 
+# Template note:
+#   This workflow is set to manual-only (workflow_dispatch) to avoid failed runs
+#   on the template repo where GitHub Pages is not enabled.
+#   To enable auto-deploy after forking:
+#     1. Enable Pages in repo Settings -> Pages -> Source: GitHub Actions
+#     2. Uncomment the `push:` block below so every push to main triggers a deploy
 on:
-  push:
-    branches: [main]
+  # push:
+  #   branches: [main]
   workflow_dispatch:
 
 permissions:
