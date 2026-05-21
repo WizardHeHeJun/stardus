@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
-import elysiaAvatar from '../assets/elysia.png';
+import avatar from '../assets/avatar.png';
 import { SITE_TITLE } from '../consts';
 
 const posts = await getCollection('blog');
@@ -15,7 +15,7 @@ const tagCount = new Set(posts.flatMap((p) => p.data.tags)).size;
 <aside class="sidebar">
 	<!-- Profile -->
 	<div class="card">
-		<Image src={elysiaAvatar} width={120} height={120} alt="头像" class="avatar" />
+		<Image src={avatar} width={120} height={120} alt="头像" class="avatar" />
 		<h3 class="name">{SITE_TITLE}</h3>
 		<p class="bio">一句简短的自我介绍。</p>
 		<div class="socials">

@@ -30,7 +30,7 @@ const BACKUP_ITEMS = {
 	optional: [
 		'src/assets/blog',
 		'src/assets/bg.jpg',
-		'src/assets/elysia.png',
+		'src/assets/avatar.png',
 		'public/memories',
 	],
 };

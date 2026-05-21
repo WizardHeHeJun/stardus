@@ -84,7 +84,7 @@ stardust/
 ├── src/
 │   ├── assets/                # Vite 打包资源（自动 hash）
 │   │   ├── bg.jpg             # 全屏背景图
-│   │   ├── elysia.png         # favicon 源图
+│   │   ├── avatar.png         # favicon 源图
 │   │   └── blog/              # 博文 hero 图（按 slug 命名）
 │   ├── components/            # 可复用组件
 │   ├── content/blog/          # 博文（.md / .mdx）
@@ -435,7 +435,7 @@ npm run refresh-og --force   # 全量重抓
 | 模式 | 内容 | 体积 |
 |------|------|------|
 | **标准** | `src/content/blog` + `src/data` + 几个 config 文件 + CLAUDE.md + package.json | KB 级 |
-| **完整** | 标准 + `src/assets/blog` + `bg.jpg` + `elysia.png` + `public/memories` | MB 级 |
+| **完整** | 标准 + `src/assets/blog` + `bg.jpg` + `avatar.png` + `public/memories` | MB 级 |
 
 实现约束（见 [scripts/lib/backup.mjs](scripts/lib/backup.mjs)）：
 - tar.gz 包内嵌 `.backup-manifest-<ts>.json`，还原前可 dry-read
@@ -518,7 +518,7 @@ npm run refresh-og --force   # 全量重抓
 | 选中态色（nav / TOC / 社交 hover） | `src/components/Header.astro` + `src/components/TableOfContents.astro` 搜 `#475569` / `#334155` / `rgba(226, 232, 240` |
 | 头像 wiggle 强度 | `global.css` 的 `@keyframes avatar-wiggle` |
 | 背景图 | 替换 `src/assets/bg.jpg` |
-| favicon | 替换 `src/assets/elysia.png`，跑 `gen-favicon.mjs` |
+| favicon | 替换 `src/assets/avatar.png`，跑 `gen-favicon.mjs` |
 | 音乐歌单 | `src/components/MusicPlayer.astro` 的 `playlistId` |
 | 友链卡 accent fallback | `src/pages/friends.astro` 顶部 `pickThumb` |
 | Mermaid 主题色 | `src/layouts/BlogPost.astro` 末尾 `mermaid.initialize` |

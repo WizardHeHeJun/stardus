@@ -13,7 +13,7 @@
 - [ ] `src/consts.ts` — 填 `SITE_TITLE`、`SITE_DESCRIPTION`，以及 `GISCUS` 的 4 个 ID（从 https://giscus.app 取）
 - [ ] `astro.config.mjs` — 把 `site` URL 改成你的域名
 - [ ] `package.json` — 更新 `name`、`author`、`repository`
-- [ ] `src/assets/elysia.png` — 换成你自己的头像（200×200 PNG），然后跑 `node scripts/gen-favicon.mjs` 重生 favicon
+- [ ] `src/assets/avatar.png` — 换成你自己的头像（200×200 PNG），然后跑 `node scripts/gen-favicon.mjs` 重生 favicon
 - [ ] `src/assets/bg.jpg` — 换成你自己的背景图（或保留默认的渐变 placeholder）
 - [ ] `src/data/friends.json` — 加你的友链（或保持 `[]`）
 - [ ] 全局搜索 `href="#"` 占位，把 Header / Footer / Sidebar / about 里的社交链接换成你自己的
@@ -21,7 +21,7 @@
 - [ ] `.github/workflows/*.yml` — 确认 deploy 目标对应你的仓库
 - [ ] 删除或重写 `src/content/blog/blog-features-showcase.md`（默认作为功能演示保留）
 
-> ⚠️ 替换 `src/assets/elysia.png` 后必须跑 `node scripts/gen-favicon.mjs` 重新生成 favicon。每次 `npm run build` **可能要连跑 2-3 次**——前几次可能跳过 CSS 输出（详见 CLAUDE.md「关键陷阱」第 10 条）。验证：`ls dist/_astro/*.css | wc -l` 应该是 7。
+> ⚠️ 替换 `src/assets/avatar.png` 后必须跑 `node scripts/gen-favicon.mjs` 重新生成 favicon。每次 `npm run build` **可能要连跑 2-3 次**——前几次可能跳过 CSS 输出（详见 CLAUDE.md「关键陷阱」第 10 条）。验证：`ls dist/_astro/*.css | wc -l` 应该是 7。
 
 ---
 
@@ -181,7 +181,7 @@ stardust/
 ├── src/
 │   ├── assets/                      # Vite 打包资源（自动 hash）
 │   │   ├── bg.jpg                   # 全屏背景图
-│   │   ├── elysia.png               # favicon 源图
+│   │   ├── avatar.png               # favicon 源图
 │   │   └── blog/                    # 博文 hero 图（按 slug 命名）
 │   ├── components/                  # 可复用组件（Header / Footer / TOC / 评论 / 拖尾 / 音乐...）
 │   ├── content/blog/                # ⭐ 写新文章的地方（.md / .mdx）
@@ -263,7 +263,7 @@ node scripts/crop-hero.mjs      # 竖版人像图预裁为脸居中横版
 | 模式 | 内容 | 体积 |
 | :--- | :--- | :--- |
 | **标准** | `src/content/blog` + `src/data` + 几个 config 文件 + CLAUDE.md + package.json | KB 级 |
-| **完整** | 标准 + `src/assets/blog` + `bg.jpg` + `elysia.png` + `public/memories` | MB 级 |
+| **完整** | 标准 + `src/assets/blog` + `bg.jpg` + `avatar.png` + `public/memories` | MB 级 |
 
 实现约束（见 [scripts/lib/backup.mjs](scripts/lib/backup.mjs)）：
 
@@ -306,7 +306,7 @@ git push
 | 全屏背景渐变 | [src/styles/global.css](src/styles/global.css) body `background-image` + [src/assets/bg.jpg](src/assets/bg.jpg)（图层主力，删了会透出 CSS 兜底渐变） |
 | 头像 wiggle 强度 | [src/styles/global.css](src/styles/global.css) 的 `@keyframes avatar-wiggle` |
 | 全屏背景图 | 替换 [src/assets/bg.jpg](src/assets/bg.jpg) |
-| favicon | 替换 [src/assets/elysia.png](src/assets/elysia.png) → 跑 `node scripts/gen-favicon.mjs` |
+| favicon | 替换 [src/assets/avatar.png](src/assets/avatar.png) → 跑 `node scripts/gen-favicon.mjs` |
 | 音乐歌单 | [src/components/MusicPlayer.astro](src/components/MusicPlayer.astro) 的 `playlistId`（网易云歌单 ID） |
 | 友链 | [src/data/friends.json](src/data/friends.json) → 改完跑 `npx bloom refresh-og` |
 | 回忆相册 | [src/data/memories.json](src/data/memories.json) + 图片丢 `public/memories/` |

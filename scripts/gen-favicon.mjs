@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import { mkdirSync } from 'node:fs';
 
-const SRC = 'src/assets/elysia.png';
+const SRC = 'src/assets/avatar.png';
 const OUT = 'public';
 
 mkdirSync(OUT, { recursive: true });
