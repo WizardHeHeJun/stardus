@@ -1,6 +1,6 @@
 ---
 name: blog-writer
-description: 帮助在 Astro 6 + GitHub Pages 个人博客项目创建新博文。三种入口（CMS 浏览器 / CLI 菜单 / npm run new），引导填 frontmatter（5 类枚举分类 + 标签 + 置顶 + 草稿），按文章类型给结构模板，主动建议视觉元素（mermaid / 表格 / Shoka directives）和内容插入（行内图 / figure / link card / 引用块），辅助找 hero 图（用户已有图 / Safebooru 二选一），重要修改前提示 backup，最后跑 build + 提示 git push。使用场景：写一篇博文、写博客、新博文、记录一下、想发个 post、new post、create blog post。
+description: 帮助在 Astro 6 + GitHub Pages 个人博客项目创建新博文。三种入口（CMS 浏览器 / stardust 菜单 / stardust new），引导填 frontmatter（5 类枚举分类 + 标签 + 置顶 + 草稿），按文章类型给结构模板，主动建议视觉元素（mermaid / 表格 / Shoka directives）和内容插入（行内图 / figure / link card / 引用块），辅助找 hero 图（用户已有图 / Safebooru 二选一），重要修改前提示 backup，最后跑 build + 提示 git push。使用场景：写一篇博文、写博客、新博文、记录一下、想发个 post、new post、create blog post。
 ---
 
 # Blog Post Skill
@@ -26,11 +26,11 @@ description: 帮助在 Astro 6 + GitHub Pages 个人博客项目创建新博文�
 - 改 schema 字段（category / tags / slug 重排）
 - 跨多文件批量操作（如重命名 slug 牵涉 lqip.json）
 
-操作：`npm run cli` → 「📦 备份」→ 选「📦 标准」。出问题用 `npm run cli` → 「📂 还原」回退。
+操作：`npx stardust backup` 选「📦 标准」（或 `npx stardust` 进菜单选「📦 备份」）。出问题用 `npx stardust restore` 回退。
 
 ### ⚠ CMS 路径的协作限制
 
-走 CMS 浏览器编辑器（`npm run cms`）时，你**做不到**：
+走 CMS 浏览器编辑器（`npx stardust cms`）时，你**做不到**：
 
 - 直接编辑浏览器里的 CodeMirror 内容
 - 看到用户当前未保存的文字
@@ -62,9 +62,9 @@ description: 帮助在 Astro 6 + GitHub Pages 个人博客项目创建新博文�
 
 | 入口 | 适合 | 命令 |
 |------|------|------|
-| **CMS 浏览器**（默认推荐） | 写长文 / 想要实时预览 + 表单填字段 | `npm run cms` → http://localhost:4322 |
-| **CLI 菜单** | 终端流 + 顺便管备份 | `npm run cli` → 选「✍ 新建博文」|
-| **直接 scaffold** | 字段都想清楚了 | `npm run new` |
+| **CMS 浏览器**（默认推荐） | 写长文 / 想要实时预览 + 表单填字段 | `npx stardust cms` → http://localhost:4322 |
+| **stardust 菜单** | 终端流 + 顺便管备份 | `npx stardust` → 选「✍ 新建博文」|
+| **直接 scaffold** | 字段都想清楚了 | `npx stardust new` |
 | **直接 Edit** | 改已有博文 | Read/Edit `src/content/blog/<slug>.md` |
 
 **(b) 主题 + 分类**：
@@ -87,11 +87,11 @@ description: 帮助在 Astro 6 + GitHub Pages 个人博客项目创建新博文�
 **不要手写 frontmatter**——schema enum 容易踩错。按 Step 1 (a) 选的入口执行：
 
 - **CMS 路径**：用户在浏览器，**跳过本步**——左侧 form 直接填字段
-- **CLI 菜单**：`npm run cli` → 选「✍ 新建博文」（内部委托给 `new-post.mjs`）
-- **TTY 直接模式**：用户在终端 → `npm run new`，按 prompt 填
+- **stardust 菜单**：`npx stardust` → 选「✍ 新建博文」（内部委托给 `new-post.mjs`）
+- **TTY 直接模式**：用户在终端 → `npx stardust new`，按 prompt 填
 - **Piped 模式**（你在 Bash 工具里替用户走）：
   ```bash
-  printf '<title>\n<slug>\n<cat-num>\n<tags-csv>\n<y/n>\n<desc>\n' | npm run new
+  printf '<title>\n<slug>\n<cat-num>\n<tags-csv>\n<y/n>\n<desc>\n' | npx stardust new
   ```
   字段顺序：title / slug / category(1-5) / tags / featured / description。空回车 = 用默认 fallback。
 

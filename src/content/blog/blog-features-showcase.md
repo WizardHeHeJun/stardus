@@ -13,7 +13,7 @@ tags: ['说明书', 'markdown', 'callout', 'mermaid', '博客功能']
 
 这篇文章只回答**一个问题**：「想写新博文，可以用哪些写法、有哪些自家扩展、frontmatter 该怎么填？」——把站点支持的全部「写作端写法」一次性摆出来，下次开新文章时直接抄。
 
-> 站点的「**阅读端功能**」（音乐播放器 / 画板 / 友链 / 抽屉 / TOC / Pagefind 等）和「**工具端功能**」（bloom CLI / 本地 CMS / 备份等）请翻 [README](#)——这篇专管写作时怎么敲键盘。
+> 站点的「**阅读端功能**」（音乐播放器 / 画板 / 友链 / 抽屉 / TOC / Pagefind 等）和「**工具端功能**」（stardust CLI / 本地 CMS / 备份等）请翻 [README](#)——这篇专管写作时怎么敲键盘。
 
 ## 一、Frontmatter 速查
 
@@ -302,11 +302,11 @@ https://github.com/withastro/astro
 https://mermaid.js.org/
 
 :::warning
-**OG 数据离线抓取**——CI 不联网。新写裸 URL 后必须本地跑一次 `npx bloom refresh-og`，把 `src/data/og-cache.json` 一起 commit。没抓到（或站点没 OG）会降级为 fallback 文本卡，不会断渲染。
+**OG 数据离线抓取**——CI 不联网。新写裸 URL 后必须本地跑一次 `npx stardust refresh-og`，把 `src/data/og-cache.json` 一起 commit。没抓到（或站点没 OG）会降级为 fallback 文本卡，不会断渲染。
 
 ```bash
-npx bloom refresh-og           # 增量：仅未缓存或失败的
-npx bloom refresh-og --force   # 全量重抓
+npx stardust refresh-og           # 增量：仅未缓存或失败的
+npx stardust refresh-og --force   # 全量重抓
 ```
 :::
 

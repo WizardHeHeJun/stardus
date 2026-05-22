@@ -42,18 +42,23 @@
 ## 开发命令
 
 ```powershell
-# 写作
-npm run cli              # 一站式 CLI 菜单：新建/备份/还原/列表/清理
-npm run new              # 仅新建一篇博文（CLI 菜单的「新建」也走它）
-npm run cms              # 本地浏览器 CMS（端口 4322，仅 localhost 可访问）
+# 写作（自家 stardust CLI，bin 注册在 package.json）
+npx stardust                     # 一站式交互菜单：新建/CMS/刷OG/备份/还原/列表/清理
+npx stardust new                 # 仅新建一篇博文
+npx stardust cms                 # 本地浏览器 CMS（端口 4322，仅 127.0.0.1）
+npx stardust refresh-og          # 抓 friends.json + 博文裸 URL 的 OG meta（--force 全量重抓）
+npx stardust backup              # 备份内容/配置（交互选标准/完整）
+npx stardust restore             # 从备份还原（默认先备份当前状态）
+npx stardust list                # 列出已有备份
+npx stardust clean               # 清理旧备份
+npx stardust --help              # 子命令清单
 
 # 开发
 npm run dev              # http://localhost:4321/
 npm run build            # 生产构建到 dist/（prebuild 自动重生 lqip.json）
 npm run preview          # 本地预览构建产物
 
-# 资源
-npm run refresh-og              # 抓 friends.json 的 OG meta（--force 全量重抓）
+# 资源（无 stardust 子命令包装，直接跑脚本）
 node scripts/gen-favicon.mjs    # 重新生成 favicon
 node scripts/crop-hero.mjs      # 预裁竖图为脸居中横版
 
@@ -398,14 +403,14 @@ grep -E 'preinstall|postinstall' node_modules/<pkg>/package.json
 ### 新博文（三入口）
 
 ```powershell
-# A. CLI 菜单（推荐——可顺手备份/还原）
-npm run cli
+# A. stardust 交互菜单（推荐——可顺手备份/还原）
+npx stardust
 
 # B. 仅 scaffold
-npm run new
+npx stardust new
 
 # C. 浏览器写作
-npm run cms          # 端口 4322，首次自动 npm install cms/
+npx stardust cms      # 端口 4322，首次自动 npm install cms/
 ```
 
 后续：加 hero 图 → `git push` → 等 GitHub Actions ~40s。
@@ -417,20 +422,20 @@ npm run cms          # 端口 4322，首次自动 npm install cms/
 #    { "name": "...", "url": "https://...", "description": "...", "accent": "#hex" }
 
 # 2. 抓 OG meta
-npm run refresh-og           # 增量：仅未缓存或 failed
-npm run refresh-og --force   # 全量重抓
+npx stardust refresh-og           # 增量：仅未缓存或 failed
+npx stardust refresh-og --force   # 全量重抓
 
 # 3. 一起 commit friends.json + og-cache.json
 ```
 
 约束：
 - `refresh-og` **不**链入 prebuild——CI 不上网，build 永不被网络波动阻塞
-- 加新友链后**必须本地跑过** `refresh-og` 再 push
+- 加新友链后**必须本地跑过** `stardust refresh-og` 再 push
 - OG 抓不到 → fallback 字母 tile，不会断图
 
 ### 备份还原
 
-`npm run cli` 走入。两种粒度：
+`npx stardust backup` 直接走入（或 `npx stardust` 进菜单选「备份」）。两种粒度：
 
 | 模式 | 内容 | 体积 |
 |------|------|------|
@@ -491,10 +496,10 @@ npm run refresh-og --force   # 全量重抓
 | `plugins/remark-mermaid.mjs` | mermaid 代码块包装 |
 | `plugins/remark-figure.mjs` | 段落图转 figure + figcaption |
 | `plugins/remark-link-card.mjs` | 裸 URL 转 OG 链接卡 |
-| `scripts/blog-cli.mjs` | CLI 菜单（npm run cli） |
-| `scripts/new-post.mjs` | 新建博文 scaffold |
-| `scripts/run-cms.mjs` | 启动浏览器 CMS |
-| `scripts/refresh-og.mjs` | 抓 OG meta |
+| `scripts/blog-cli.mjs` | stardust CLI 入口（菜单 + 子命令分发，bin 注册名 = stardust） |
+| `scripts/new-post.mjs` | 新建博文 scaffold（stardust new 委托） |
+| `scripts/run-cms.mjs` | 启动浏览器 CMS（stardust cms 委托） |
+| `scripts/refresh-og.mjs` | 抓 OG meta（stardust refresh-og 委托） |
 | `scripts/gen-lqip.mjs` | LQIP 生成（prebuild 跑） |
 | `scripts/gen-favicon.mjs` | favicon 生成 |
 | `scripts/crop-hero.mjs` | 竖图预裁脸居中 |
@@ -534,7 +539,7 @@ npm run refresh-og --force   # 全量重抓
 ### 开始前
 - [ ] 看现有代码有无相似 pattern 可复用
 - [ ] 装新包 → 跑供应链审查清单
-- [ ] 改 schema / 配置 → 备份当前状态（`npm run cli` → 备份）
+- [ ] 改 schema / 配置 → 备份当前状态（`npx stardust backup`）
 
 ### 实现中
 - [ ] CSS 用项目约定写法（min() / clamp() / minmax min() / transform）
